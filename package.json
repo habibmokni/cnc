@@ -1,0 +1,26 @@
+{
+  "name": "@habibmokni/cnc",
+  "version": "1.0.4",
+  "description": "This is a click and collect micro-service",
+  "author": {
+    "name": "habibmokni",
+    "email": "habib.mokni@outlook.fr"
+  },
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/habibmokni/iRun-Shop"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/habibmokni"
+  },
+  "peerDependencies": {
+    "@angular/common": "^12.0.5",
+    "@angular/core": "^12.0.5",
+    "@angular/material": "^12.2.11",
+    "@angular/flex-layout": "^12.0.0-beta.35",
+    "@angular/google-maps": "^12.2.11"
+  },
+  "dependencies": {
+    "tslib": "^2.1.0"
+  }
+}

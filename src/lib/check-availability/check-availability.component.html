@@ -1,0 +1,59 @@
+
+<div *ngIf="!isSizeSelected" style="width: 270px;">
+  <mat-card-title style="display: block;">Select Size</mat-card-title>
+  <mat-card-subtitle *ngIf="size>0">Your current size selection is: {{size}}</mat-card-subtitle>
+  <div class="product_size_list_expansion" *ngFor="let size of data.sizes; let i=index">
+    <mat-divider></mat-divider>
+    <a fxLayout
+    style=" color: #8B283D; background-color: white;"
+    (click)="changeSize(size)"
+    >
+    {{size}}
+    </a>
+    <mat-divider></mat-divider>
+  </div>
+</div>
+
+
+<div mat-dialog-content class="content" [fxShow]="isSizeSelected">
+  <mat-card-title style="display: block;">Check Availability</mat-card-title>
+  <mat-card-subtitle>Enter the location or zip code to check which nearest store has the selected product</mat-card-subtitle>
+  <a mat-flat-button type="button" style="width: 100%; text-align: start;" (click)="isSizeSelected=false">Size Selected: {{size}}</a>
+  <mat-tab-group mat-align-tabs="start">
+    <mat-tab label="Address">
+      <div fxLayout>
+        <mat-form-field class="product_availability_zipcode" fxFlex="80%" style=" margin-top: 10px;">
+          <input id="search" matInput type="text" placeholder="Enter zip code or address">
+        </mat-form-field>
+        <button mat-icon-button type="button" (click)="currentLocation()"><mat-icon class="icon" fontSet="material-icons-outlined">room</mat-icon></button>
+      </div>
+
+      <div *ngIf="nearByStores">
+        <div *ngFor="let store of nearByStores; let i= index;">
+          <mat-divider></mat-divider>
+            <mat-card-content>
+              <div fxLayout>
+                <h2>{{store.stores.name}}</h2>
+                <span class="filler"></span>
+                <mat-icon fontSet="material-icons-outlined">room</mat-icon><h5>{{store.distances.toFixed(2)}}km</h5>
+              </div>
+
+              <h4 style="display: contents;">Address: {{store.stores.address}}</h4>
+              <h5 *ngIf="store.stock>5" style="color: green;">Size {{size}} is in good stock</h5>
+              <h5 *ngIf="store.stock<=5 && store.stock>0" style="color: yellow;">Size {{size}} is almost sold out</h5>
+              <h5 *ngIf="store.stock===0"style="color: red;">Size {{size}} is out of stock</h5>
+
+              </mat-card-content>
+            <mat-divider></mat-divider>
+          </div>
+      </div>
+    </mat-tab>
+    <mat-tab label="Map" class="maps">
+      <cnc-maps
+      *ngIf="isSizeSelected"
+      [size]="size"
+      [modelNo]="data.modelNo"
+      ></cnc-maps>
+    </mat-tab>
+  </mat-tab-group>
+</div>

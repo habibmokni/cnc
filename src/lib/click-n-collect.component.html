@@ -1,0 +1,112 @@
+<div fxLayout="column" *ngIf="user && cartProducts.length > 0">
+  <div fxLayout style="padding: 15px;" (click)="onOpenDialog()" *ngIf="user">
+    <div fxFlex="20%" fxLayoutAlign="center center">
+      <button mat-icon-button type="button"><mat-icon style="font-size: 32px; padding-right: 40px; line-height: 0.5;" fontSet="material-icons-outlined">room</mat-icon></button>
+    </div>
+    <div fxFlex="70%">
+      <h2>{{user.storeSelected.name}}</h2>
+      <mat-card-subtitle>{{user.storeSelected.address}}</mat-card-subtitle>
+      <mat-hint *ngIf="allItemsAvailable"><mat-icon style="color: green; font-size: 14px;">fiber_manual_record</mat-icon> With this option, all products can be picked up</mat-hint>
+      <mat-error *ngIf="!allItemsAvailable"><mat-icon style="color: red; font-size: 14px;">fiber_manual_record</mat-icon> With this option, not all products can be picked</mat-error>
+    </div>
+    <div fxFlex="10%" fxLayoutAlign="center center">
+      <button mat-icon-button type="button"><mat-icon>chevron_right</mat-icon></button>
+    </div>
+  </div>
+  <div class="cart-items" fxLayout="column" *ngIf="!allItemsAvailable">
+    <mat-card *ngFor="let product of cartItemUnavailable; let i=index">
+      <div class="item-image-container" fxFlex="30%">
+        <img src="{{product.productImage}}" style="width: 100%;" alt="image">
+      </div>
+      <div fxFlex="50%" fxLayout="column" style="padding-left: 15px;">
+        <h3>{{product.productName}}</h3>
+          <mat-card-subtitle>{{'Size : ' + product.size}}
+          <mat-error>out of stock</mat-error>
+        </mat-card-subtitle>
+      </div>
+      <div fxflex="20%">
+        <h2 style="line-height: 22px;">{{product.price}}€</h2>
+      </div>
+    </mat-card>
+    <div style="text-align: center; margin: 10px;">
+      <button mat-flat-button color="warn" type="button" (click)="removeProductsUnavailable()">Remove unavailable items</button>
+    </div>
+  </div>
+  <div fxLayout="column" fxLayoutAlign="center center" style="padding: 15px;" *ngIf="!user">
+    <h2>Please select a collection point</h2>
+    <button mat-flat-button style=" background-color: #8B283D;" (click)="onOpenDialog()">Find Store</button>
+  </div>
+  <mat-divider></mat-divider>
+  <div fxLayout="column">
+    <h2 style="padding: 20px;">Book a slot</h2>
+    <div class="calendar">
+      <div class="calendar_list" fxFlex="100% no-wrap" fxLayout>
+        <button
+          *ngFor="let date of calender; let i=index"
+          class="button"
+          mat-raised-button
+          style=" color: #8B283D;"
+          (click)="onDaySelect(i, date)"
+          [disabled]="date.getDay()===6 || date.getDay()===0"
+          >
+          <mat-card-subtitle>{{days[date.getDay()]}}</mat-card-subtitle>
+          <p style="font-size: 18px; line-height: 12px; font-weight: 500; margin-bottom: 5px;">{{date.getDate()}}</p>
+          <mat-icon style="font-size: 8px;">fiber_manual_record</mat-icon>
+        </button>
+    </div>
+    </div>
+    <mat-divider></mat-divider>
+    <mat-accordion>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Select collection time
+          </mat-panel-title>
+          <mat-panel-description>Optional</mat-panel-description>
+        </mat-expansion-panel-header>
+        <div fxFlex="100%" *ngIf="!times">
+          <h3>Please select a day to get store timing</h3>
+        </div>
+        <div class="time" fxFlex="100%" *ngIf="times">
+          <mat-radio-group
+            labelPosition="before"
+            style="margin: 15px 0;"
+            fxLayout="column">
+            <div *ngFor="let time of times">
+              <mat-radio-button style="margin: 5px;" [value]="time" fxFlex="100" (click)="onTimeSelected(time)">
+                <div fxLayout fxFlex="100%">
+                  <h2>{{time}}:00 - {{time+1}}:00</h2>
+                  <span class="filler"></span>
+                  <p style="color: grey; font-size: 14px; margin-top: 7px; margin-bottom: 0px;">Free</p>
+                </div>
+              </mat-radio-button>
+              <mat-divider></mat-divider>
+            </div>
+          </mat-radio-group>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+  </div>
+
+</div>
+
+<div fxLayout="column" *ngIf="!user">
+  <div>
+    <mat-card-title>No store selected</mat-card-title>
+    <mat-card-subtitle>Please select a store to use click and collect feature else use delivery method</mat-card-subtitle>
+    <mat-card-actions>
+      <button type="button" mat-flat-button style="background-color: #8B283D;" (click)="onOpenDialog()">Select Store</button>
+    </mat-card-actions>
+  </div>
+</div>
+
+<div *ngIf="user && cartProducts.length === 0">
+  <div fxLayout="column" style="margin: auto; width: 75%; padding-top: 25px;">
+    <mat-card-title>No products in cart!</mat-card-title>
+    <mat-card-subtitle>Please add products in cart to use click and collect feature.</mat-card-subtitle>
+    <mat-card-actions style="text-align: center; margin: 25px;">
+      <button type="button" mat-flat-button style="background-color: #8B283D; color: white;" routerLink="/">Go to store</button>
+    </mat-card-actions>
+  </div>
+</div>
