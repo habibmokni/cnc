@@ -147,11 +147,11 @@ export class StoreAvailabilityComponent implements OnInit {
       let isAvailable = 0;
         for(let store of this.stores){
           console.log('store changed');
-
+          isAvailable = 10
             //yahan products ki for loop use karni h
             for(let product of store.products){
               for(let a=0; a<cartProducts.length; a++){
-                if(product.modelNo === cartProducts[a].modelNo){
+                if(product.modelNo === cartProducts[a].modelNo && isAvailable>0){
                   for(let variant of product.variants){
                     if(variant.variantId === cartProducts[a].variantId){
                       for(let index=0; index<variant.sizes.length; index++){
@@ -159,7 +159,6 @@ export class StoreAvailabilityComponent implements OnInit {
                         if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems){
                           isAvailable = 10;
                           console.log('product found with all the requirements' + +variant.inStock[index]);
-
                         }
                         if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] < cartProducts[a].noOfItems){
                           isAvailable = 0;

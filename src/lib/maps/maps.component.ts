@@ -225,6 +225,7 @@ export class MapsComponent implements OnInit {
     checkAllProductsAvailabilty(cartProducts: any[]){
       let i=0;
       let newLocations: google.maps.LatLngLiteral[] = [];
+      let newStores: any[] = [];
       let allProducts = 0;
         for(let store of this.storeList){
           console.log('maps store');
@@ -254,12 +255,14 @@ export class MapsComponent implements OnInit {
             if(allProducts === cartProducts.length){
               newLocations.push(this.storeLocations[i]);
               console.log(newLocations);
+              newStores.push(store);
             }
 
 
             i++;
           }
           this.storeLocations = newLocations;
+          this.storeList = newStores;
       }
 
 

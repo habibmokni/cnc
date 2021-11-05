@@ -128,19 +128,22 @@ export class CheckAvailabilityComponent implements OnInit {
               for(let a=0; a<cartProducts.length; a++){
                 if(product.modelNo === cartProducts[a].modelNo){
 
-                  for(let variant of store.products[0].variants){
-                    for(let index=0; index<variant.sizes.length; index++){
+                  for(let variant of product.variants){
+                    if(variant.variantId === cartProducts[a].variantId){
+                      for(let index=0; index<variant.sizes.length; index++){
 
-                      if(variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems!){
-                        isAvailable = 10;
-                        console.log('product found with all the requirements');
+                        if(variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems!){
+                          isAvailable = 10;
+                          console.log('product found with all the requirements');
 
-                     }
-                     if(variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] <= cartProducts[a].noOfItems!){
-                       isAvailable = 0;
-                       console.log('no of items in cart exceed no of items available');
-                     }
+                       }
+                       if(variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] <= cartProducts[a].noOfItems!){
+                         isAvailable = 0;
+                         console.log('no of items in cart exceed no of items available');
+                       }
+                      }
                     }
+
                   }
                 }
               }
@@ -172,6 +175,5 @@ export class CheckAvailabilityComponent implements OnInit {
       },1000)
 
     }
-
 
 }

@@ -17,6 +17,7 @@ export class ClickNCollectComponent implements OnInit {
   @Output() orderPrice = new EventEmitter<number>();
   @Output() timeSelected= new EventEmitter<string>();
   @Output() storeChanged = new EventEmitter<any>();
+  @Output() isAllItemsAvailable = new EventEmitter<boolean>();
 
   @Input() cartProducts: any[]=[];
   @Input() stores: any[]=[];
@@ -40,7 +41,7 @@ export class ClickNCollectComponent implements OnInit {
   days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   preBtn!: Element;
 
-  allItemsAvailable= false;
+  allItemsAvailable= true;
   isStoreSelected = false;
 
   calender: Date[]=[];
@@ -80,9 +81,6 @@ export class ClickNCollectComponent implements OnInit {
           this.allItemsAvailable =false;
           this.cartItemUnavailable.push(this.cartProducts[i]);
           console.log(this.cartItemUnavailable);
-        }else{
-          this.allItemsAvailable =true;
-          console.log(this.cartItemUnavailable);
         }
       }
     })
@@ -93,10 +91,9 @@ export class ClickNCollectComponent implements OnInit {
       this.checkProductsStock();
       for(let i=0; i<this.itemInStock.length; i++){
         if(this.itemInStock[i] === 0){
-          this.allItemsAvailable =false;
+          this.isAllItemsAvailable.emit(false);
+          this.allItemsAvailable=false;
           this.cartItemUnavailable.push(this.cartProducts[i]);
-        }else{
-          this.allItemsAvailable =true;
         }
       }
     }
@@ -117,7 +114,7 @@ export class ClickNCollectComponent implements OnInit {
         this.times.push(i);
       }
     }else {
-      for(let i=8; i<20; i++){
+      for(let i=10; i<20; i++){
         this.times.push(i);
       }
     }
@@ -155,6 +152,7 @@ export class ClickNCollectComponent implements OnInit {
 
   removeProductsUnavailable(){
     this.productsToRemove.emit(this.cartItemUnavailable);
+    this.isAllItemsAvailable.emit(true);
     this.allItemsAvailable=true
   }
 
