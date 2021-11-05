@@ -58,13 +58,13 @@ export class StoreAvailabilityComponent implements OnInit {
         if(this.data.call === "product"){
           this.cncService.find_closest_marker(latitude, longitude);
           setTimeout(() => {
-            this.checkProductAvailabilty(sizeAndModelSelected.modelNo,sizeAndModelSelected.size);
+            this.checkProductAvailabilty(sizeAndModelSelected.modelNo,sizeAndModelSelected.size, this.data.variantId);
           }, 500);
         }
         if(this.data.call === "size-selector"){
           this.cncService.find_closest_marker(latitude, longitude);
           setTimeout(() => {
-            this.checkProductAvailabilty(this.data.modelNo,this.data.size);
+            this.checkProductAvailabilty(this.data.modelNo,this.data.size, this.data.variantId);
           }, 500);
         }
         if(this.data.call === "checkout"){
@@ -91,7 +91,7 @@ export class StoreAvailabilityComponent implements OnInit {
 
   }
 
-  checkProductAvailabilty(modelNo: string, productSize: number){
+  checkProductAvailabilty(modelNo: string, productSize: number, variantId: string){
     let i=0;
 
       for(let store of this.stores){
@@ -101,19 +101,22 @@ export class StoreAvailabilityComponent implements OnInit {
             if(product.modelNo === modelNo){
               console.log('model matched');
               for(let variant of product.variants){
-                for(let index=0; index<variant.sizes.length; index++){
+                if(variant.variantId === variantId){
+                  console.log('variant matched');
+                  for(let index=0; index<variant.sizes.length; index++){
 
-                  if(+variant.sizes[index] === +productSize){
-                    console.log(variant.sizes[index]);
-                    this.nearByStores.push({
-                      stores: store,
-                      stock: +variant.inStock[index],
-                      distances: this.cncService.distanceInKm[i]
-                    });
-                    console.log(this.nearByStores);
-                 }
-                    this.nearByStores.sort((a,b)=> a.distances-b.distances)
+                    if(+variant.sizes[index] === +productSize){
+                      console.log(variant.sizes[index]);
+                      this.nearByStores.push({
+                        stores: store,
+                        stock: +variant.inStock[index],
+                        distances: this.cncService.distanceInKm[i]
+                      });
+                   }
+                      this.nearByStores.sort((a,b)=> a.distances-b.distances)
+                  }
                 }
+
               }
             }
 
@@ -149,19 +152,20 @@ export class StoreAvailabilityComponent implements OnInit {
             for(let product of store.products){
               for(let a=0; a<cartProducts.length; a++){
                 if(product.modelNo === cartProducts[a].modelNo){
+                  for(let variant of product.variants){
+                    if(variant.variantId === cartProducts[a].variantId){
+                      for(let index=0; index<variant.sizes.length; index++){
 
-                  for(let variant of store.products[0].variants){
-                    for(let index=0; index<variant.sizes.length; index++){
+                        if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems){
+                          isAvailable = 10;
+                          console.log('product found with all the requirements' + +variant.inStock[index]);
 
-                      if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems){
-                        isAvailable = 10;
-                        console.log('product found with all the requirements' + +variant.inStock[index]);
-
-                     }
-                     if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] < cartProducts[a].noOfItems){
-                       isAvailable = 0;
-                       console.log('no of items in cart exceed no of items available'+ +variant.inStock[index]) ;
-                     }
+                        }
+                        if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] < cartProducts[a].noOfItems){
+                          isAvailable = 0;
+                          console.log('no of items in cart exceed no of items available'+ +variant.inStock[index]) ;
+                        }
+                      }
                     }
                   }
                 }

@@ -16,6 +16,7 @@ export class MapsComponent implements OnInit {
   @Input() mapWidth: number= screen.width;
   @Input() modelNo: any;
   @Input() size: number = 0;
+  @Input() variantId: string = '';
 
   @Input() cartProducts: any[] = [];
 
@@ -143,7 +144,7 @@ export class MapsComponent implements OnInit {
     this.user = this.cncService.getUser();
     this.currentStore = this.storeList[0];
     if(this.size>0){
-      this.checkProductAvailabilty(this.modelNo, this.size )
+      this.checkProductAvailabilty(this.modelNo, this.size, this.variantId)
     }else{
       if(this.cartProducts.length>0){
         this.checkAllProductsAvailabilty(this.cartProducts);
@@ -190,7 +191,7 @@ export class MapsComponent implements OnInit {
     this.infoWindow.close();
     this.dialog.closeAll();
   }
-  checkProductAvailabilty(modelNo: string, productSize: number){
+  checkProductAvailabilty(modelNo: string, productSize: number,  variantId: string){
     let i=0;
     console.log(this.storeList)
     let newLocations = [];
@@ -201,14 +202,17 @@ export class MapsComponent implements OnInit {
             if(product.modelNo === modelNo){
               console.log("model true");
               for(let variant of product.variants){
-                for(let index=0; index<variant.sizes.length; index++){
-                  console.log(productSize);
-                  if(+variant.sizes[index] === +productSize && +variant.inStock[index]>0){
-                    console.log(variant.sizes[index]);
-                    newLocations.push(this.storeLocations[i]);
-                    console.log(newLocations);
-                 }
+                if(variant.variantId === variantId){
+                  for(let index=0; index<variant.sizes.length; index++){
+                    console.log(productSize);
+                    if(+variant.sizes[index] === +productSize && +variant.inStock[index]>0){
+                      console.log(variant.sizes[index]);
+                      newLocations.push(this.storeLocations[i]);
+                      console.log(newLocations);
+                   }
+                  }
                 }
+
               }
             }
 
@@ -232,14 +236,15 @@ export class MapsComponent implements OnInit {
                 if(product.modelNo === cartProducts[a].modelNo){
                   console.log('map model match');
                   for(let variant of product.variants){
-                    for(let index=0; index<variant.sizes.length; index++){
+                    if(variant.variantId === cartProducts[a].variantId){
+                      for(let index=0; index<variant.sizes.length; index++){
 
-                      if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems){
-                        allProducts++;
-                        console.log('this is stock of cart products' + cartProducts[a].noOfItems + 'variant' + variant.inStock[index]);
-                        console.log(allProducts);
-                     }
-
+                        if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems){
+                          allProducts++;
+                          console.log('this is stock of cart products' + cartProducts[a].noOfItems + 'variant' + variant.inStock[index]);
+                          console.log(allProducts);
+                       }
+                      }
                     }
                   }
                 }

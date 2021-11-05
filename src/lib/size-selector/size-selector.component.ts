@@ -90,7 +90,8 @@ export class SizeSelectorComponent implements OnInit {
           call: 'size-selector',
           size: this.size,
           modelNo: product.modelNo!,
-          sizes: product.variants[0].sizes
+          sizes: product.variants[0].sizes,
+          variantId: product.variants[0].variantId
         },
         maxWidth: '100vw',
         maxHeight: '100vh'

@@ -61,7 +61,7 @@ export class CheckAvailabilityComponent implements OnInit {
 
           this.cncService.find_closest_marker(latitude, longitude);
           setTimeout(() => {
-            this.checkProductAvailabilty(this.data.modelNo,this.size);
+            this.checkProductAvailabilty(this.data.modelNo,this.size, this.data.variantId);
           }, 100);
 
         console.log(this.nearByStores);
@@ -80,7 +80,7 @@ export class CheckAvailabilityComponent implements OnInit {
 
   }
 
-  checkProductAvailabilty(modelNo: string, productSize: number){
+  checkProductAvailabilty(modelNo: string, productSize: number, variantId: string){
     let i=0;
 
       for(let store of this.stores){
@@ -89,8 +89,10 @@ export class CheckAvailabilityComponent implements OnInit {
           for(let product of store.products){
             if(product.modelNo === modelNo){
               console.log("model true");
-              for(let variant of store.products[0].variants){
-                for(let index=0; index<variant.sizes.length; index++){
+              for(let variant of product.variants){
+                if(variant.variantId === variantId){
+                 console.log('variant matched');
+                 for(let index=0; index<variant.sizes.length; index++){
 
                   if(+variant.sizes[index] === +productSize){
                     console.log(variant.sizes[index]);
@@ -103,6 +105,8 @@ export class CheckAvailabilityComponent implements OnInit {
                  }
                     this.nearByStores.sort((a,b)=> a.distances-b.distances)
                 }
+                }
+
               }
             }
 
@@ -164,7 +168,7 @@ export class CheckAvailabilityComponent implements OnInit {
       this.cncService.getCurrentLocation();
       setTimeout(()=>{
         this.nearByStores = [];
-        this.checkProductAvailabilty(this.data.modelNo,this.size);
+        this.checkProductAvailabilty(this.data.modelNo,this.size, this.data.variantId);
       },1000)
 
     }
