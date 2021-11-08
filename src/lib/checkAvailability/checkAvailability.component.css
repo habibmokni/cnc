@@ -1,0 +1,19 @@
+.filler{
+  flex: 1 1 auto;
+}
+.product_size_list_expansion a {
+  height: 46px;
+  font-family: DM Sans;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 46px;
+  padding: 0 24px 16px;
+}
+.pac-container{
+  top: 500px;
+}
+.icon{
+  font-size: 32px;
+    margin-top: 24px;
+    padding-left: 10px;
+}

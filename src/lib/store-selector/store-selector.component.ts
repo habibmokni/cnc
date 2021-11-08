@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ClickNCollectService } from '../click-n-collect.service';
+import { ClickNCollectService } from '../clickNCollect.service';
 
 @Component({
   selector: 'cnc-store-selector',

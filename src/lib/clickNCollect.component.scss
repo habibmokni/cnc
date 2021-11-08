@@ -1,0 +1,36 @@
+.filler{
+  flex: 1 1 auto;
+}
+.mat-button-toggle-checked{
+  border: 3px solid #80808070;
+}
+.calendar {
+  margin-top: 5px;
+}
+.calendar_list{
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  padding-bottom: 15px;
+}
+.calendar_list::-webkit-scrollbar{
+  display: none;
+}
+.calendar_list button {
+  margin-right: 5px;
+  font-family: DM Sans;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  border-radius: 15px;
+}
+.active {
+  text-decoration: none;
+  background: linear-gradient(180deg, #D53D5E 0%, #8B283D 100%);
+  color: white !important;
+}
+
+.item-image-container{
+  width: 100%;
+  height: 120px;
+}
