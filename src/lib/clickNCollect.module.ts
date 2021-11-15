@@ -7,7 +7,7 @@ import { ClickNCollectComponent } from './clickNCollect.component';
 import { MapsModule } from './maps/maps.module';
 import { MaterialModule } from './shared/modules/material.module';
 import { SizeSelectorModule } from './sizeSelector/sizeSelector.module';
-import { StoreAvailabilityModule } from './storeAvailability/storeAvailability.module';
+import { ProductAvailabilityModule } from './productAvailability/productAvailability.module';
 import { StoreSelectorModule } from './store-selector/store-selector.module';
 
 
@@ -21,7 +21,7 @@ import { StoreSelectorModule } from './store-selector/store-selector.module';
     FlexLayoutModule,
     GoogleMapsModule,
     MapsModule,
-    StoreAvailabilityModule,
+    ProductAvailabilityModule,
     SizeSelectorModule,
     StoreSelectorModule,
     CheckAvailabilityModule
@@ -30,7 +30,7 @@ import { StoreSelectorModule } from './store-selector/store-selector.module';
     SizeSelectorModule,
     ClickNCollectComponent,
     StoreSelectorModule,
-    StoreAvailabilityModule,
+    ProductAvailabilityModule,
     CheckAvailabilityModule
   ]
 })

@@ -1,4 +1,4 @@
-<div fxLayout="column" *ngIf="user && cartProducts.length > 0">
+<div fxLayout="column" *ngIf="user && cartProducts.length>0">
   <div fxLayout style="padding: 15px;" (click)="onOpenDialog()" *ngIf="user">
     <div fxFlex="20%" fxLayoutAlign="center center">
       <button mat-icon-button type="button"><mat-icon style="font-size: 32px; padding-right: 40px; line-height: 0.5;" fontSet="material-icons-outlined">room</mat-icon></button>
@@ -29,12 +29,12 @@
       </div>
     </mat-card>
     <div style="text-align: center; margin: 10px;">
-      <button mat-flat-button color="warn" type="button" (click)="removeProductsUnavailable()">Remove unavailable items</button>
+      <button id="removeButton" mat-flat-button color="warn" type="button" (click)="removeProductsUnavailable()">Remove unavailable items</button>
     </div>
   </div>
-  <div fxLayout="column" fxLayoutAlign="center center" style="padding: 15px;" *ngIf="!user">
+  <div fxLayout="column" fxLayoutAlign="center center" style="padding: 15px;" *ngIf="!isStoreSelected">
     <h2>Please select a collection point</h2>
-    <button mat-flat-button style=" background-color: #8B283D;" (click)="onOpenDialog()">Find Store</button>
+    <button mat-flat-button id="openDialog" style=" background-color: #8B283D;" (click)="onOpenDialog()">Find Store</button>
   </div>
   <mat-divider></mat-divider>
   <div fxLayout="column">
@@ -43,7 +43,7 @@
       <div class="calendar_list" fxFlex="100% no-wrap" fxLayout>
         <button
           *ngFor="let date of calender; let i=index"
-          class="button"
+          class="dateButton"
           mat-raised-button
           style=" color: #8B283D;"
           (click)="onDaySelect(i, date)"

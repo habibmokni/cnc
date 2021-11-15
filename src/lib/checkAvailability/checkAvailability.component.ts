@@ -14,6 +14,7 @@ export class CheckAvailabilityComponent implements OnInit {
   productAvailabilty: string[] = [];
   @Input() stores: any[] = [];
   size=0;
+  cartProducts: any[] = [];
   isSizeSelected = false;
 
   constructor(

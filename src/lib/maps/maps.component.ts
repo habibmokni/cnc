@@ -201,6 +201,7 @@ export class MapsComponent implements OnInit {
     let i=0;
     console.log(this.storeList)
     let newLocations = [];
+    let newStore = [];
     for(let store of this.storeList){         //running store loop
       for(let product of store.products){
         if(product.modelNo === modelNo){      //if store product matches modelno of selected product
@@ -213,6 +214,7 @@ export class MapsComponent implements OnInit {
                   console.log(variant.sizes[index]);
                   newLocations.push(this.storeLocations[i]);
                   console.log(newLocations);
+                  newStore.push(this.storeList[i]);
                }
               }
             }
@@ -223,6 +225,7 @@ export class MapsComponent implements OnInit {
     }
     //adding new locations to storelocations
     this.storeLocations = newLocations;
+    this.storeList = newStore;
   }
   //triggers when in checkout page and checks whether all products available or not
   checkAllProductsAvailabilty(cartProducts: any[]){
@@ -261,7 +264,8 @@ export class MapsComponent implements OnInit {
       if(allProducts === cartProducts.length){
         newLocations.push(this.storeLocations[i]);
         console.log(newLocations);
-        newStores.push(store);
+        newStores.push(this.storeList[i]);
+        console.log(this.storeList[i]);
       }
       i++;
     }

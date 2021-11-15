@@ -7,6 +7,7 @@
     <div class="product_size_list_expansion" *ngFor="let size of product.variants[0].sizes; let i=index">
       <mat-divider></mat-divider>
       <a fxLayout
+      id="sizeSelector"
       style=" color: #8B283D;"
       (click)="onSizeSelect(size,i,product)"
       [ngStyle]="+product.variants[0].inStock[i]===0 ? {backgroundColor: 'rgba(0,0,0,.16)', color: 'rgb(184, 184, 184)'}: {backgroundColor: 'white'}"
@@ -35,6 +36,7 @@
     </mat-card-content>
     <mat-card-actions style="text-align: center;">
       <button
+      id="changeStore"
       (click)="openDialog(product)"
       style="background: linear-gradient(180deg, #D53D5E 0%, #8B283D 100%); border-radius: 17px; color: white;"
       mat-flat-button

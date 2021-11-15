@@ -3,11 +3,11 @@ import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ClickNCollectService } from '../clickNCollect.service';
 
 @Component({
-  selector: 'cnc-store-availability',
-  templateUrl: './storeAvailability.component.html',
-  styleUrls: ['./storeAvailability.component.css']
+  selector: 'cnc-product-availability',
+  templateUrl: './productAvailability.component.html',
+  styleUrls: ['./productAvailability.component.css']
 })
-export class StoreAvailabilityComponent implements OnInit {
+export class ProductAvailabilityComponent implements OnInit {
   //accessing instance of search element from Dom
   @ViewChild('search') address!: ElementRef;
 
@@ -71,7 +71,7 @@ export class StoreAvailabilityComponent implements OnInit {
             this.cncService.find_closest_marker(latitude, longitude);
             setTimeout(() => {
               console.log(this.cartProducts);
-              this.checkAllProductsAvailabilty(this.cartProducts);
+              this.checkAllProductsAvailability(this.cartProducts);
             },500);
           }
           console.log(this.nearByStores);
@@ -134,7 +134,7 @@ export class StoreAvailabilityComponent implements OnInit {
     this.dialog.closeAll();
   }
   //to check each pproduct of cart in all stores
-  checkAllProductsAvailabilty(cartProducts: any[]){
+  checkAllProductsAvailability(cartProducts: any[]){
     let i=0;
     let isAvailable = 0;
     //looping each store

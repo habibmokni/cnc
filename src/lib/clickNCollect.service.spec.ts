@@ -10,7 +10,20 @@ describe('ClickNCollectService', () => {
     service = TestBed.inject(ClickNCollectService);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  it('should be get storeList', () => {
+    service.getStoreList();
+    expect(service.stores).not.toBe([]);
   });
+
+  it('should get nearby stores', () => {
+    service.storesNearBy();
+    expect(service.storesNearBy).not.toBe([]);
+  });
+
+  it('should get distance of stores', () => {
+    service.find_closest_marker(service.currentLocation.lat, service.currentLocation.lng);
+    expect(service.distanceInKm).not.toBe([]);
+  });
+
+
 });

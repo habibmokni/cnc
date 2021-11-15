@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angu
 import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { ClickNCollectService } from '../clickNCollect.service';
-import { StoreAvailabilityComponent } from '../storeAvailability/storeAvailability.component';
+import { ProductAvailabilityComponent } from '../productAvailability/productAvailability.component';
 
 @Component({
   selector: 'cnc-size-selector',
@@ -41,11 +41,15 @@ export class SizeSelectorComponent implements OnInit {
       if(this.user){
         for(let products of this.user.storeSelected.products){
           if(products.modelNo === this.product.modelNo){
-            for(let i=0; i<products.variants[0].sizes.length; i++){
-              console.log("sizes are checked")
-              if(products.variants[0].sizes[i] === this.size){
-                console.log('size matched');
-                this.stock = +products.variants[0].inStock[i];
+            for(let variant of products.variant){
+              if(variant.variantId === this.product.variantId){
+                for(let i=0; i<variant.sizes.length; i++){
+                  console.log("sizes are checked")
+                  if(variant.sizes[i] === this.size){
+                    console.log('size matched');
+                    this.stock = +variant.inStock[i];
+                  }
+                }
               }
             }
           }
@@ -60,12 +64,20 @@ export class SizeSelectorComponent implements OnInit {
     //if user has already store selected it runs to check availability in that store
     if(this.user){
       for(let products of this.user.storeSelected.products){
+        console.log('product loop');
         if(products.modelNo === this.product.modelNo){
-          for(let i=0; i<products.variants[0].sizes.length; i++){
-            console.log("sizes are checked")
-            if(products.variants[0].sizes[i] === this.size){
-              console.log('size matched');
-              this.stock = +products.variants[0].inStock[i];
+          console.log('products model matched');
+          for(let variant of products.variants){
+
+            if(variant.variantId === this.product.variants[0].variantId){
+              console.log('variant id match');
+              for(let i=0; i<variant.sizes.length; i++){
+                console.log("sizes are checked");
+                if(variant.sizes[i] === this.size){
+                  console.log('size matched');
+                  this.stock = +variant.inStock[i];
+                }
+              }
             }
           }
         }
@@ -82,7 +94,7 @@ export class SizeSelectorComponent implements OnInit {
   //open dialog box with storeAvailabilty component
   openDialog(product: any) {
     if(this.isSizeSelected){
-      this.dialog.open(StoreAvailabilityComponent, {
+      this.dialog.open(ProductAvailabilityComponent, {
         //sending data to dialog box
         data: {
           call: 'size-selector',
@@ -99,7 +111,7 @@ export class SizeSelectorComponent implements OnInit {
   }
   //runs if user clicks on change store
   changeStore(product: any) {
-    this.dialog.open(StoreAvailabilityComponent, {
+    this.dialog.open(ProductAvailabilityComponent, {
       data: {
         call: 'size-selector',
         size: this.size,

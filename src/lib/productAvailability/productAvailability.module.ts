@@ -2,14 +2,14 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MaterialModule } from '../shared/modules/material.module';
 import { BrowserModule } from '@angular/platform-browser';
-import { StoreAvailabilityComponent } from './storeAvailability.component';
+import { ProductAvailabilityComponent } from './productAvailability.component';
 import { MapsModule } from '../maps/maps.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 
 
 
 @NgModule({
-  declarations: [StoreAvailabilityComponent],
+  declarations: [ProductAvailabilityComponent],
   imports: [
     CommonModule,
     MaterialModule,
@@ -17,6 +17,6 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     FlexLayoutModule,
     MapsModule
   ],
-  exports: [StoreAvailabilityComponent]
+  exports: [ProductAvailabilityComponent]
 })
-export class StoreAvailabilityModule { }
+export class ProductAvailabilityModule { }

@@ -13,17 +13,19 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MapsModule } from './../maps/maps.module';
 import { ClickNCollectService } from '../clickNCollect.service';
 
-import { CheckAvailabilityComponent } from './checkAvailability.component';
+import { MapsComponent } from './maps.component';
+import { MatInputModule } from '@angular/material/input';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MaterialModule } from '../shared/modules/material.module';
 
-describe('CheckAvailabilityComponent', () => {
-  let component: CheckAvailabilityComponent;
-  let fixture: ComponentFixture<CheckAvailabilityComponent>;
+describe('MapsComponent', () => {
+  let component: MapsComponent;
+  let fixture: ComponentFixture<MapsComponent>;
   let service: ClickNCollectService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CheckAvailabilityComponent ],
+      declarations: [ MapsComponent ],
       imports: [
         MaterialModule,
         GoogleMapsModule,
@@ -42,10 +44,9 @@ describe('CheckAvailabilityComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CheckAvailabilityComponent);
+    fixture = TestBed.createComponent(MapsComponent);
     component = fixture.componentInstance;
     component.cartProducts = service.stores[0].products;
-    component.stores = service.getStoreList();
     service.distanceInKm.push(415.555888777999, 45588.8878787878787, 66969.3232323232);
     fixture.detectChanges();
   });
@@ -53,14 +54,15 @@ describe('CheckAvailabilityComponent', () => {
   it('should check selected product availability', ()=> {
     component.checkProductAvailabilty('22224488', 42, '#590F34');
     fixture.detectChanges();
-    console.log(component.nearByStores);
-    expect(component.nearByStores).not.toBe([]);
+    expect(component.storeLocations).not.toBe([]);
+    expect(component.storeList).not.toBe([]);
   });
 
   it('should check all cartProducts availability', ()=>{
     component.checkAllProductsAvailabilty(component.cartProducts);
     fixture.detectChanges();
-    expect(component.nearByStores).not.toBe([]);
+    expect(component.storeLocations).not.toBe([]);
+    expect(component.storeList).not.toBe([]);
   });
 
   it('should run on component create', fakeAsync(() => {
