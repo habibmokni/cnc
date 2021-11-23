@@ -15,12 +15,11 @@
       {{size}}
       <span class="filler"></span>
       <p *ngIf="+product.variants[0].inStock[i]<5 && +product.variants[0].inStock[i]>0" style="color: #dfdf53;">almost sold out</p>
-      <mat-icon *ngIf="+product.variants[0].inStock[i]===0" style="padding-top: 9px; color: rgb(184, 184, 184);" fontSet="material-icons-outlined">room</mat-icon>
-      <p *ngIf="+product.variants[0].inStock[i]===0" style="color: rgb(184, 184, 184)">out of stock</p>
+      <p *ngIf="+product.variants[0].inStock[i]===0" style="color: rgb(184, 184, 184)">Sold out | Check in stores</p>
+      <mat-icon *ngIf="+product.variants[0].inStock[i]===0" style="padding-top: 9px; color: #8B283D;" fontSet="material-icons-outlined">room</mat-icon>
       </a>
-    <mat-divider></mat-divider>
+      <mat-divider></mat-divider>
     </div>
-
   </mat-expansion-panel>
 </mat-accordion>
 <mat-divider></mat-divider>

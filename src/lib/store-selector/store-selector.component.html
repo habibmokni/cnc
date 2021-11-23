@@ -1,12 +1,12 @@
-<div>
+<div class="main">
   <div class="product_availability" fxLayout="column" fxLayoutAlign="center center">
     <mat-card-title style="display: block;">Find stores nearby you</mat-card-title>
     <mat-card-subtitle style="padding: 0px 15px;">Enter the location or zip code to check which nearest store has the selected product</mat-card-subtitle>
       <div mat-dialog-content class="content">
-      <mat-tab-group mat-align-tabs="start">
+      <mat-tab-group mat-align-tabs="center">
         <mat-tab label="Address">
           <mat-form-field class="product_availability_zipcode" style="width: 230px; margin-top: 10px;">
-            <input id="search" matInput type="text" placeholder="Enter zip code or address">
+            <input id="search" matInput type="text" placeholder="Enter zip code or address" autofocus>
           </mat-form-field>
           <div *ngIf="nearByStores" style="max-width: 80%;">
             <div *ngFor="let store of nearByStores; let i= index;">
@@ -31,7 +31,7 @@
       </mat-tab-group>
     </div>
 
-      </div>
+  </div>
       <div class="selected_store">
         <div *ngIf="user">
           <mat-card-content>

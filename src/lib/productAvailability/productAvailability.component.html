@@ -2,10 +2,10 @@
 <div mat-dialog-content class="content">
   <h2 style="display: block;">Check Availability</h2>
   <mat-card-subtitle>Enter the location or zip code to check which nearest store has the selected product</mat-card-subtitle>
-  <mat-tab-group mat-align-tabs="start">
+  <mat-tab-group mat-align-tabs="center">
     <mat-tab label="Address">
       <mat-form-field class="product_availability_zipcode" style="width: 230px; margin-top: 10px;">
-        <input id="search" matInput type="text" placeholder="Enter zip code or address">
+        <input id="search" matInput type="text" placeholder="Enter zip code or address" autofocus>
       </mat-form-field>
       <div *ngIf="nearByStores">
         <div *ngFor="let store of nearByStores; let i= index;">

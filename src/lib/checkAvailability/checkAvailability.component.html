@@ -19,11 +19,11 @@
   <mat-card-title style="display: block;">Check Availability</mat-card-title>
   <mat-card-subtitle>Enter the location or zip code to check which nearest store has the selected product</mat-card-subtitle>
   <a mat-flat-button type="button" style="width: 100%; text-align: start;" (click)="isSizeSelected=false">Size Selected: {{size}}</a>
-  <mat-tab-group mat-align-tabs="start">
+  <mat-tab-group mat-align-tabs="center">
     <mat-tab label="Address">
       <div fxLayout>
         <mat-form-field class="product_availability_zipcode" fxFlex="80%" style=" margin-top: 10px;">
-          <input id="search" matInput type="text" placeholder="Enter zip code or address">
+          <input id="search" matInput type="text" placeholder="Enter zip code or address" autofocus>
         </mat-form-field>
         <button mat-icon-button type="button" (click)="currentLocation()"><mat-icon class="icon" fontSet="material-icons-outlined">room</mat-icon></button>
       </div>

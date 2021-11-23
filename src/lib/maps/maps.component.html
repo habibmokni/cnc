@@ -4,7 +4,7 @@
   [height]="mapHeight"
   [width]="mapWidth"
   >
-    <map-marker [position]="currentLocation" [icon]="logo" [options]="markerOptions"></map-marker>
+    <map-marker [position]="currentLocation" [label]="label" [options]="markerOptions"></map-marker>
     <map-marker
     #marker="mapMarker"
     *ngFor="let store of storeList; let i=index;"

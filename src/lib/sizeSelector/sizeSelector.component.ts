@@ -41,8 +41,8 @@ export class SizeSelectorComponent implements OnInit {
       if(this.user){
         for(let products of this.user.storeSelected.products){
           if(products.modelNo === this.product.modelNo){
-            for(let variant of products.variant){
-              if(variant.variantId === this.product.variantId){
+            for(let variant of products.variants){
+              if(variant.variantId === this.product.variants[0].variantId){
                 for(let i=0; i<variant.sizes.length; i++){
                   console.log("sizes are checked")
                   if(variant.sizes[i] === this.size){
@@ -105,7 +105,8 @@ export class SizeSelectorComponent implements OnInit {
         },
         //defining size of dialog box
         maxWidth: '100vw',
-        maxHeight: '100vh'
+        maxHeight: '100vh',
+        panelClass: ['animate__animated','animate__slideInUp']
       });
     }
   }

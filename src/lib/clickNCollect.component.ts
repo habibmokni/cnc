@@ -40,6 +40,7 @@ export class ClickNCollectComponent implements OnInit {
   times: number[] = []
   days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   preBtn!: Element;
+  preIndex: number = 10;
   //checks for item availability
   allItemsAvailable= true;
   isStoreSelected = false;
@@ -109,36 +110,44 @@ export class ClickNCollectComponent implements OnInit {
     this.dateSelected.emit(date);
     //styling the button selected
     const buttonList = document.getElementsByClassName('dateButton');
-    buttonList[index].classList.add("active");
-    if(this.preBtn){
-      this.preBtn.classList.remove("active");
-    }
-    this.preBtn = buttonList[index];
-    const currentDate = new Date();
-    this.times = [];
-    //check if todays time exceeds time limit
-    if(date.getDay() === currentDate.getDay()){
-      for(let i=this.currentTime+1; i<20; i++){
-        this.times.push(i);
+    if(this.preIndex === index){
+      if(this.preBtn){
+        this.preBtn.classList.remove("active");
       }
-    }else {
-      for(let i=10; i<20; i++){
-        this.times.push(i);
+      this.preIndex = 10;
+    }else{
+      buttonList[index].classList.add("active");
+      if(this.preBtn !== buttonList[index] && this.preBtn){
+        this.preBtn.classList.remove("active");
+      }
+      this.preIndex = index;
+      this.preBtn = buttonList[index];
+      const currentDate = new Date();
+      this.times = [];
+      //check if todays time exceeds time limit
+      if(date.getDay() === currentDate.getDay()){
+        for(let i=this.currentTime+1; i<20; i++){
+          this.times.push(i);
+        }
+      }else {
+        for(let i=10; i<20; i++){
+          this.times.push(i);
+        }
       }
     }
-
   }
   //runs if time selected
   onTimeSelected(time: number){
     this.timeSelected.emit(time+':00 - '+ (time+1) +":00");
     this.expansionPanel.close();
   }
-  //calling storeAvailabilty Component
+  //calling productAvailabilty Component
   onOpenDialog(){
     this.dialog.open(ProductAvailabilityComponent, {
       data: {
         call: 'checkout'
-      }
+      },
+      panelClass: ['animate__animated','animate__slideInUp']
     });
   }
   //checking product stock

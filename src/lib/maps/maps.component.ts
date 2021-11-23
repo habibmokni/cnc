@@ -126,7 +126,12 @@ export class MapsComponent implements OnInit {
 
   currentUserLocation: google.maps.LatLngLiteral = { lat: 31.4914, lng: 74.2385};
   currentLocation: google.maps.LatLngLiteral = { lat: 51.44157584725519, lng: 7.565725496333208};
-  logo="../../assets/images/logos/location.png";
+  label={
+    text: "#xe56a", // codepoint from https://fonts.google.com/icons
+      fontFamily: "Material Icons",
+      color: "#ffffff",
+      fontSize: "18px"
+  };
   icon = {
     url: "https://fonts.google.com/icons?selected=Material%20Icons%20Outlined%3Awhere_to_vote%3A", // url
   };
