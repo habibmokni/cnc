@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionPanel } from '@angular/material/expansion';
+import { Router } from '@angular/router';
 import { ClickNCollectService } from './clickNCollect.service';
 import { ProductAvailabilityComponent } from './productAvailability/productAvailability.component';
 
@@ -46,7 +47,7 @@ export class ClickNCollectComponent implements OnInit {
   isStoreSelected = false;
 
   calender: Date[]=[];
-  constructor(private dialog: MatDialog, private cncService: ClickNCollectService) {
+  constructor(private router: Router, private dialog: MatDialog, private cncService: ClickNCollectService) {
     //creating our inline calender
     const date= new Date();
     const day=date.getDate();
@@ -176,6 +177,10 @@ export class ClickNCollectComponent implements OnInit {
     this.allItemsAvailable=true;
     this.productsToRemove.emit(this.cartItemUnavailable);
     this.isAllItemsAvailable.emit(true);
+  }
+
+  selectStore(){
+    this.router.navigate(['/storeselector']);
   }
 
 }
