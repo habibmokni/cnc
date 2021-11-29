@@ -119,6 +119,7 @@ export class MapsComponent implements OnInit {
     animation: google.maps.Animation.DROP
   };
 
+  isStoreSelected = false;
   user: any;
   currentStore: any;
   //storeLocations: {lat: number, lng: number}[];
@@ -200,6 +201,7 @@ export class MapsComponent implements OnInit {
     }
     this.infoWindow.close();
     this.dialog.closeAll();
+    this.isStoreSelected = true;
   }
   //checks if the selected product is avaialble in the store or not
   checkProductAvailabilty(modelNo: string, productSize: number,  variantId: string){
@@ -276,6 +278,9 @@ export class MapsComponent implements OnInit {
     }
     this.storeLocations = newLocations;
     this.storeList = newStores;
+  }
+  reselectStore(){
+    this.isStoreSelected = false;
   }
 
 }

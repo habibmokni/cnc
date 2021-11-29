@@ -91,12 +91,12 @@
 
 </div>
 
-<div fxLayout="column" *ngIf="!user">
+<div fxLayout="column" style="margin: auto; width: 75%; padding-top: 25px;" *ngIf="!user">
   <div>
     <mat-card-title>No store selected</mat-card-title>
     <mat-card-subtitle>Please select a store to use click and collect feature else use delivery method</mat-card-subtitle>
     <mat-card-actions>
-      <button type="button" mat-flat-button style="background-color: #8B283D;" (click)="onOpenDialog()">Select Store</button>
+      <button type="button" mat-flat-button style="background-color: #8B283D; color: white;" routerLink="/storeselector">Select Store</button>
     </mat-card-actions>
   </div>
 </div>
@@ -106,7 +106,7 @@
     <mat-card-title>No products in cart!</mat-card-title>
     <mat-card-subtitle>Please add products in cart to use click and collect feature.</mat-card-subtitle>
     <mat-card-actions style="text-align: center; margin: 25px;">
-      <button type="button" mat-flat-button style="background-color: #8B283D; color: white;" routerLink="/">Go to store</button>
+      <button type="button" mat-flat-button style="background-color: #8B283D; color: white;" routerLink="/home">Go to store</button>
     </mat-card-actions>
   </div>
 </div>
