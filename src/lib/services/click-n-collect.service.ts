@@ -8,22 +8,21 @@ import { CartProduct } from '../types/cart.type';
 export class ClickNCollectService {
   private readonly mapDirectionsService = inject(MapDirectionsService);
 
-  // ── State signals ───────────────────────────────────────────────
   readonly stores = signal<Store[]>([]);
   readonly cartProducts = signal<CartProduct[]>([]);
   readonly user = signal<CncUser | null>(null);
   readonly markerPositions = signal<google.maps.LatLngLiteral[]>([]);
-  readonly currentLocation = signal<google.maps.LatLngLiteral>({
-    lat: 51.44157584725519,
-    lng: 7.565725496333208,
-  });
+  readonly currentLocation = signal<google.maps.LatLngLiteral | null>(null);
   readonly distanceInKm = signal<number[]>([]);
   readonly selectedStore = signal<Store | null>(null);
   readonly directionsResult = signal<google.maps.DirectionsResult | undefined>(
     undefined,
   );
 
-  // ── Derived ─────────────────────────────────────────────────────
+  constructor() {
+    this.getCurrentLocation();
+  }
+
   readonly nearbyStores = computed<NearbyStore[]>(() => {
     const distances = this.distanceInKm();
     return this.stores()
@@ -31,7 +30,6 @@ export class ClickNCollectService {
       .sort((a, b) => a.distance - b.distance);
   });
 
-  // ── Setters (public API for consuming apps) ─────────────────────
   setStoreList(stores: Store[]): void {
     this.stores.set(stores);
   }
@@ -58,18 +56,18 @@ export class ClickNCollectService {
     this.user.set(updated);
   }
 
-  // ── Directions ──────────────────────────────────────────────────
   getDirections(location: { lat: number; lng: number }): void {
+    const origin = this.currentLocation();
+    if (!origin) return;
     this.mapDirectionsService
       .route({
         destination: location,
-        origin: this.currentLocation(),
+        origin,
         travelMode: google.maps.TravelMode.DRIVING,
       })
       .subscribe((response) => this.directionsResult.set(response.result));
   }
 
-  // ── Geolocation ─────────────────────────────────────────────────
   getCurrentLocation(): void {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((position) => {
@@ -82,7 +80,6 @@ export class ClickNCollectService {
     });
   }
 
-  // ── Distance calculation ────────────────────────────────────────
   findClosestMarker(lat: number, lng: number): void {
     const R = 6371;
     const rad = (x: number) => (x * Math.PI) / 180;
@@ -97,9 +94,7 @@ export class ClickNCollectService {
     this.distanceInKm.set(distances);
   }
 
-  // ── Pure stock utilities ────────────────────────────────────────
 
-  /** Find in-store stock count for a specific product size. */
   findStockForSize(
     storeProducts: readonly any[],
     modelNo: string,
@@ -117,7 +112,6 @@ export class ClickNCollectService {
     return 0;
   }
 
-  /** Check cart items against a store's inventory. Pure derivation. */
   checkCartStock(
     cart: readonly CartProduct[],
     storeProducts: readonly any[],
@@ -141,7 +135,6 @@ export class ClickNCollectService {
     return { allAvailable: unavailable.length === 0, unavailable, total };
   }
 
-  /** Check single-product availability across all stores. */
   checkProductAvailability(
     modelNo: string,
     size: number,
@@ -169,7 +162,6 @@ export class ClickNCollectService {
     return results.sort((a, b) => a.distance - b.distance);
   }
 
-  /** Check full-cart availability across all stores. */
   checkAllProductsAvailability(cart: readonly CartProduct[]): NearbyStore[] {
     const distances = this.distanceInKm();
     const results: NearbyStore[] = [];
@@ -196,7 +188,6 @@ export class ClickNCollectService {
     return results.sort((a, b) => a.distance - b.distance);
   }
 
-  /** Filter stores that have a specific product in stock. */
   filterByProductAvailability(
     modelNo: string,
     size: number,
@@ -227,7 +218,6 @@ export class ClickNCollectService {
     return { stores, locations };
   }
 
-  /** Filter stores that have all cart products in stock. */
   filterByCartAvailability(
     cart: readonly CartProduct[],
   ): Readonly<{

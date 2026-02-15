@@ -4,7 +4,9 @@
       [options]="options()"
       [height]="mapHeight()"
       [width]="mapWidth()">
-      <map-marker [position]="currentLocation()" [options]="markerOptions" />
+      @if (currentLocation(); as loc) {
+        <map-marker [position]="loc" [options]="markerOptions" />
+      }
 
       @for (store of storeList(); track store.id; let i = $index) {
         <map-marker
@@ -22,8 +24,6 @@
           <button mat-flat-button type="button" (click)="onGetDirections(cs.location)">Directions</button>
         </map-info-window>
       }
-
-      <map-marker [position]="currentUserLocation()" />
 
       @if (directionsResult(); as dr) {
         <map-directions-renderer [directions]="dr" />

@@ -33,7 +33,6 @@ export class MapsComponent {
 
   readonly infoWindow = viewChild<MapInfoWindow>('infoWindow');
 
-  // ── Inputs ─────────────────────────────────────────────────────
   readonly mapHeight = input<number>(450);
   readonly mapWidth = input<number>(
     typeof screen !== 'undefined' ? screen.width : 400,
@@ -43,7 +42,6 @@ export class MapsComponent {
   readonly variantId = input<string>('');
   readonly cartProducts = input<CartProduct[]>([]);
 
-  // ── Derived from service + inputs ──────────────────────────────
   private readonly filteredData = computed(() => {
     const s = this.size();
     if (s > 0) {
@@ -68,14 +66,8 @@ export class MapsComponent {
     this.cncService.directionsResult(),
   );
 
-  // ── Local state ────────────────────────────────────────────────
   readonly isStoreSelected = signal(false);
   readonly currentStore = signal<Store | null>(null);
-
-  readonly currentUserLocation = signal<google.maps.LatLngLiteral>({
-    lat: 31.4914,
-    lng: 74.2385,
-  });
 
   readonly mapStyles: google.maps.MapTypeStyle[] = [
     {
@@ -115,41 +107,29 @@ export class MapsComponent {
     },
   ];
 
-  readonly options = signal<google.maps.MapOptions>({
-    center: { lat: 51.44157584725519, lng: 7.565725496333208 },
-    zoom: 8,
-    styles: this.mapStyles,
-  });
-
   readonly markerOptions: google.maps.MarkerOptions = {
     draggable: false,
     animation: google.maps.Animation.DROP,
   };
 
-  readonly currentLocation = signal<google.maps.LatLngLiteral>({
-    lat: 51.44157584725519,
-    lng: 7.565725496333208,
+  // ── Derived from service (no hardcoded coords) ─────────────────
+  readonly currentLocation = computed(() => this.cncService.currentLocation());
+
+  readonly options = computed<google.maps.MapOptions>(() => {
+    const loc = this.currentLocation();
+    return {
+      ...(loc ? { center: loc } : {}),
+      zoom: 8,
+      styles: this.mapStyles,
+    };
   });
 
-  // ── Actions ────────────────────────────────────────────────────
   onGetCurrentLocation(): void {
     this.cncService.getCurrentLocation();
-    // Reactively read the updated location after geolocation resolves
-    const check = setInterval(() => {
-      const loc = this.cncService.currentLocation();
-      if (loc.lat !== 51.44157584725519 || loc.lng !== 7.565725496333208) {
-        this.options.set({ ...this.options(), center: loc });
-        this.currentUserLocation.set(loc);
-        clearInterval(check);
-      }
-    }, 200);
-    // Safety: clear after 5s
-    setTimeout(() => clearInterval(check), 5000);
   }
 
   onGetDirections(location: { lat: number; lng: number }): void {
     this.cncService.getDirections(location);
-    this.options.update((o) => ({ ...o, zoom: 2 }));
   }
 
   openInfoWindow(

@@ -44,26 +44,22 @@ export class CheckAvailabilityComponent {
   private readonly cncService = inject(ClickNCollectService);
   readonly data: any = inject(MAT_DIALOG_DATA);
 
-  // ── viewChild for autocomplete (replaces document.getElementById) ─
-  readonly searchInput =
-    viewChild<ElementRef<HTMLInputElement>>('searchInput');
+  readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
-  // ── Derived from service ───────────────────────────────────────
   readonly stores = computed(() => this.cncService.stores());
 
-  // ── Local state ────────────────────────────────────────────────
   readonly nearbyStores = signal<NearbyStore[]>([]);
   readonly size = signal(0);
   readonly isSizeSelected = signal(false);
 
+  private readonly geoRequested = signal(false);
+
   constructor() {
-    // Initialise from dialog data
     if (this.data.size) {
       this.size.set(this.data.size);
       this.isSizeSelected.set(true);
     }
 
-    // Set up Google Places Autocomplete when the input element appears
     effect((onCleanup) => {
       const el = this.searchInput()?.nativeElement;
       if (!el) return;
@@ -90,9 +86,23 @@ export class CheckAvailabilityComponent {
 
       onCleanup(() => google.maps.event.removeListener(listener));
     });
+
+    effect(() => {
+      const loc = this.cncService.currentLocation();
+      if (!loc || !this.geoRequested()) return;
+      this.nearbyStores.set([]);
+      this.cncService.findClosestMarker(loc.lat, loc.lng);
+      this.nearbyStores.set(
+        this.cncService.checkProductAvailability(
+          this.data.modelNo,
+          this.size(),
+          this.data.variantId,
+        ),
+      );
+      this.geoRequested.set(false);
+    });
   }
 
-  // ── Actions ────────────────────────────────────────────────────
   changeSize(newSize: number): void {
     this.nearbyStores.set([]);
     this.size.set(newSize);
@@ -100,22 +110,7 @@ export class CheckAvailabilityComponent {
   }
 
   currentLocation(): void {
+    this.geoRequested.set(true);
     this.cncService.getCurrentLocation();
-    // After geolocation resolves, compute availability
-    const check = setInterval(() => {
-      const loc = this.cncService.currentLocation();
-      if (loc.lat !== 51.44157584725519 || loc.lng !== 7.565725496333208) {
-        this.nearbyStores.set([]);
-        this.nearbyStores.set(
-          this.cncService.checkProductAvailability(
-            this.data.modelNo,
-            this.size(),
-            this.data.variantId,
-          ),
-        );
-        clearInterval(check);
-      }
-    }, 200);
-    setTimeout(() => clearInterval(check), 5000);
   }
 }
