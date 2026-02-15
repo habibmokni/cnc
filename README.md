@@ -17,7 +17,7 @@
 | Change Detection | Default | **`OnPush`** everywhere |
 | Layout | `@angular/flex-layout` | **CSS Flexbox** (no runtime dep) |
 | Styling | Hard-coded colors | **Material 3 CSS custom properties** (`--mat-sys-*`) |
-| Types | `any` everywhere | **Typed models** (`Store`, `CncUser`, `CartProduct`, etc.) |
+| Types | `any` everywhere | **Minimal interfaces + generics** — consumers `extends` with their own fields |
 | Maps | Bundled Google Maps JS | **`@angular/google-maps` v21** (consumer loads API) |
 
 ---
@@ -44,50 +44,91 @@ npm install @habibmokni/cnc
 
 ## Quick start
 
-### 1. Import the module (backward-compatible)
+### 1. Import standalone components
 
 ```typescript
-import { ClickNCollectModule } from '@habibmokni/cnc';
-
-bootstrapApplication(AppComponent, {
-  providers: [importProvidersFrom(ClickNCollectModule)],
-});
-```
-
-**Or** import standalone components directly:
-
-```typescript
-import { StoreSelectorComponent, SizeSelectorComponent } from '@habibmokni/cnc';
+import {
+  StoreSelectorComponent,
+  SizeSelectorComponent,
+  ClickNCollectComponent,
+} from '@habibmokni/cnc';
 
 @Component({
-  imports: [StoreSelectorComponent, SizeSelectorComponent],
+  imports: [StoreSelectorComponent, SizeSelectorComponent, ClickNCollectComponent],
   // ...
 })
 export class MyComponent {}
 ```
 
-### 2. Bridge data via the service
+### 2. Define your types
+
+The library exports minimal interfaces. Extend them with your domain-specific fields:
+
+```typescript
+import { CncStore, CncCartItem, CncUser, CncStoreProduct } from '@habibmokni/cnc';
+
+// Your store extends the cnc contract with shop-specific fields
+interface ShoeStore extends CncStore {
+  openingTime: { open: string; close: string };
+  reviews: string;
+  rating: number;
+}
+
+// Your cart item extends with product details cnc doesn't need
+interface ShoeCartItem extends CncCartItem {
+  brand: string;
+  category: 'men' | 'women' | 'kids';
+  images: string[];
+}
+
+// Your user extends with profile fields cnc doesn't need
+interface ShoeUser extends CncUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  wishlist: string[];
+}
+```
+
+### 3. Bridge data via the service
 
 ```typescript
 import { ClickNCollectService } from '@habibmokni/cnc';
 
 export class AppComponent {
-  private cncService = inject(ClickNCollectService);
+  private cncService = inject(ClickNCollectService) as ClickNCollectService<
+    ShoeStore,
+    ShoeCartItem,
+    ShoeUser
+  >;
 
-  ngOnInit() {
+  constructor() {
     this.cncService.setStoreList(stores);
     this.cncService.setStoreLocations(locations);
     this.cncService.setUser(user);
     this.cncService.setCartProducts(cartProducts);
 
-    this.cncService.storeSelected.subscribe(store => {
-      console.log('Store selected:', store);
+    // Read the selected store reactively (signal, not Observable)
+    effect(() => {
+      const store = this.cncService.selectedStore();
+      if (store) console.log('Store selected:', store);
     });
   }
 }
 ```
 
-### 3. Use in templates
+> **Tip:** Create a typed injection helper to avoid repeating the assertion:
+>
+> ```typescript
+> // inject-cnc.ts (in your app, not the library)
+> export const injectCnc = () =>
+>   inject(ClickNCollectService) as ClickNCollectService<ShoeStore, ShoeCartItem, ShoeUser>;
+>
+> // Then in any component:
+> private cncService = injectCnc();
+> ```
+
+### 4. Use in templates
 
 ```html
 <!-- Store selector page (map + address search) -->
@@ -105,13 +146,55 @@ export class AppComponent {
   (storeChanged)="onStore($event)" />
 ```
 
-### 4. Google Maps
+### 5. Google Maps
 
 The consuming app must load the Google Maps JavaScript API (e.g. via a `<script>` tag in `index.html`):
 
 ```html
 <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
 ```
+
+---
+
+## Exported interfaces
+
+The library defines **only the fields it needs**. Consumers extend with richer types.
+
+| Interface | Fields | Purpose |
+|-----------|--------|---------|
+| `CncStore` | `id`, `name`, `address`, `location`, `products` | Store contract |
+| `CncSelectedStore` | `id`, `name`, `address`, `products?` | Lightweight store ref on user |
+| `CncStoreProduct` | `modelNo`, `variants` | In-store inventory item |
+| `CncVariant` | `variantId`, `sizes`, `instock` | Size/stock data per variant |
+| `CncCartItem` | `modelNo`, `productName`, `productImage`, `price`, `size`, `noOfItems`, `variantId?` | Cart item for stock checks + display |
+| `CncUser` | `storeSelected` | User contract (only store selection needed) |
+| `CncNearbyStore<TStore>` | `store`, `distance`, `stock?` | Generic — preserves your store type |
+
+```typescript
+import {
+  CncStore, CncStoreProduct, CncVariant, CncSelectedStore,
+  CncCartItem, CncUser, CncNearbyStore,
+} from '@habibmokni/cnc';
+```
+
+---
+
+## Generic service
+
+`ClickNCollectService` is generic on three type parameters, all defaulting to the minimal interfaces:
+
+```typescript
+class ClickNCollectService<
+  TStore extends CncStore = CncStore,
+  TCartItem extends CncCartItem = CncCartItem,
+  TUser extends CncUser = CncUser,
+>
+```
+
+This means:
+- **Library components** work without generics (they only read base fields)
+- **Consumers** get full type safety on their extended types
+- **Any e-commerce domain** works — shoes, books, electronics, groceries
 
 ---
 
@@ -125,16 +208,6 @@ The consuming app must load the Google Maps JavaScript API (e.g. via a `<script>
 | `<cnc-product-availability>` | Store availability dialog |
 | `<cnc-check-availability>` | Size-aware availability checker dialog |
 | `<cnc-maps>` | Google Maps wrapper with markers, info windows, directions |
-
----
-
-## Models
-
-```typescript
-import { Store, CncUser, CartProduct, NearbyStore } from '@habibmokni/cnc';
-```
-
-See `src/lib/models/` for full type definitions.
 
 ---
 
