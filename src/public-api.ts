@@ -16,5 +16,3 @@ export { ProductAvailabilityComponent } from './lib/components/product-availabil
 export { CheckAvailabilityComponent } from './lib/components/check-availability/check-availability.component';
 export { MapsComponent } from './lib/components/maps/maps.component';
 
-// Backward-compatible barrel module
-export { ClickNCollectModule } from './lib/modules/click-n-collect.module';
