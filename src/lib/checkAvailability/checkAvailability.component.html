@@ -1,60 +1,67 @@
-
-<div *ngIf="!isSizeSelected" style="width: 270px;">
-  <mat-card-title style="display: block;">Select Size</mat-card-title>
-  <mat-card-subtitle *ngIf="size>0">Your current size selection is: {{size}}</mat-card-subtitle>
-  <div class="product_size_list_expansion" *ngFor="let size of data.sizes; let i=index">
-    <mat-divider></mat-divider>
-    <a fxLayout
-    style=" color: #8B283D; background-color: white;"
-    (click)="changeSize(size)"
-    >
-    {{size}}
-    </a>
-    <mat-divider></mat-divider>
+@if (!isSizeSelected()) {
+  <div class="cnc-check__size-picker">
+    <h2 class="cnc-check__title">Select Size</h2>
+    @if (size() > 0) {
+      <p class="cnc-check__subtitle">Your current size selection is: {{ size() }}</p>
+    }
+    @for (s of data.sizes; track s; let i = $index) {
+      <mat-divider />
+      <a class="cnc-check__size-item" (click)="changeSize(s)">{{ s }}</a>
+      <mat-divider />
+    }
   </div>
-</div>
+}
 
+@if (isSizeSelected()) {
+  <div mat-dialog-content class="cnc-check">
+    <h2 class="cnc-check__title">Check Availability</h2>
+    <p class="cnc-check__subtitle">
+      Enter the location or zip code to check which nearest store has the selected product
+    </p>
 
-<div mat-dialog-content class="content" [fxShow]="isSizeSelected">
-  <mat-card-title style="display: block;">Check Availability</mat-card-title>
-  <mat-card-subtitle>Enter the location or zip code to check which nearest store has the selected product</mat-card-subtitle>
-  <a mat-flat-button type="button" style="width: 100%; text-align: start;" (click)="isSizeSelected=false">Size Selected: {{size}}</a>
-  <mat-tab-group mat-align-tabs="center">
-    <mat-tab label="Address">
-      <div fxLayout>
-        <mat-form-field class="product_availability_zipcode" fxFlex="80%" style=" margin-top: 10px;">
-          <input id="search" matInput type="text" placeholder="Enter zip code or address" autofocus>
-        </mat-form-field>
-        <button mat-icon-button type="button" (click)="currentLocation()"><mat-icon class="icon" fontSet="material-icons-outlined">room</mat-icon></button>
-      </div>
+    <button mat-flat-button class="cnc-check__size-btn" (click)="isSizeSelected.set(false)">
+      Size Selected: {{ size() }}
+    </button>
 
-      <div *ngIf="nearByStores">
-        <div *ngFor="let store of nearByStores; let i= index;">
-          <mat-divider></mat-divider>
-            <mat-card-content>
-              <div fxLayout>
-                <h2>{{store.stores.name}}</h2>
-                <span class="filler"></span>
-                <mat-icon fontSet="material-icons-outlined">room</mat-icon><h5>{{store.distances.toFixed(2)}}km</h5>
-              </div>
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+      <mat-tab label="Address">
+        <div class="cnc-check__search-row">
+          <mat-form-field appearance="outline" class="cnc-check__field">
+            <mat-label>Zip code or address</mat-label>
+            <input id="cnc-search-check" matInput type="text" placeholder="Enter zip code or address" />
+          </mat-form-field>
+          <button mat-icon-button type="button" (click)="currentLocation()">
+            <mat-icon fontSet="material-icons-outlined">room</mat-icon>
+          </button>
+        </div>
 
-              <h4 style="display: contents;">Address: {{store.stores.address}}</h4>
-              <h5 *ngIf="store.stock>5" style="color: green;">Size {{size}} is in good stock</h5>
-              <h5 *ngIf="store.stock<=5 && store.stock>0" style="color: yellow;">Size {{size}} is almost sold out</h5>
-              <h5 *ngIf="store.stock===0"style="color: red;">Size {{size}} is out of stock</h5>
-
-              </mat-card-content>
-            <mat-divider></mat-divider>
+        @for (ns of nearbyStores(); track ns.store.id) {
+          <mat-divider />
+          <div class="cnc-check__result">
+            <div class="cnc-check__result-header">
+              <h3>{{ ns.store.name }}</h3>
+              <span class="cnc-check__filler"></span>
+              <mat-icon fontSet="material-icons-outlined">room</mat-icon>
+              <span>{{ ns.distance.toFixed(2) }} km</span>
+            </div>
+            <p class="cnc-check__address">{{ ns.store.address }}</p>
+            @if ((ns.stock ?? 0) > 5) {
+              <p class="cnc-check__stock cnc-stock--good">Size {{ size() }} is in good stock</p>
+            } @else if ((ns.stock ?? 0) > 0) {
+              <p class="cnc-check__stock cnc-stock--low">Size {{ size() }} is almost sold out</p>
+            } @else {
+              <p class="cnc-check__stock cnc-stock--out">Size {{ size() }} is out of stock</p>
+            }
           </div>
-      </div>
-    </mat-tab>
-    <mat-tab label="Map" class="maps">
-      <cnc-maps
-      *ngIf="isSizeSelected"
-      [size]="size"
-      [modelNo]="data.modelNo"
-      [variantId]="data.variantId"
-      ></cnc-maps>
-    </mat-tab>
-  </mat-tab-group>
-</div>
+          <mat-divider />
+        }
+      </mat-tab>
+
+      <mat-tab label="Map">
+        @if (isSizeSelected()) {
+          <cnc-maps [size]="size()" [modelNo]="data.modelNo" [variantId]="data.variantId" />
+        }
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+}

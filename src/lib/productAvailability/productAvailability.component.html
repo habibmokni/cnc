@@ -1,31 +1,44 @@
+<div mat-dialog-content class="cnc-availability">
+  <h2 class="cnc-availability__title">Check Availability</h2>
+  <p class="cnc-availability__subtitle">
+    Enter the location or zip code to check which nearest store has the selected product
+  </p>
 
-<div mat-dialog-content class="content">
-  <h2 style="display: block;">Check Availability</h2>
-  <mat-card-subtitle>Enter the location or zip code to check which nearest store has the selected product</mat-card-subtitle>
-  <mat-tab-group mat-align-tabs="center">
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
     <mat-tab label="Address">
-      <mat-form-field class="product_availability_zipcode" style="width: 230px; margin-top: 10px;">
-        <input id="search" matInput type="text" placeholder="Enter zip code or address" autofocus>
-      </mat-form-field>
-      <div *ngIf="nearByStores">
-        <div *ngFor="let store of nearByStores; let i= index;">
-          <mat-divider></mat-divider>
-            <mat-card-content (click)="onStoreSelect(store.stores)">
-              <h2>{{store.stores.name}}</h2>
-              <h4 style="display: contents;">Address: {{store.stores.address}}</h4>
-              <h5>
-                <mat-icon *ngIf="store.stock>5" style="color: green;">room</mat-icon>
-                <mat-icon *ngIf="store.stock<=5 && store.stock>0" style="color: yellow;">room</mat-icon>
-                <mat-icon *ngIf="store.stock===0"style="color: red;">room</mat-icon>
-                {{store.distances.toFixed(2)}}km
-              </h5>
-              </mat-card-content>
-            <mat-divider></mat-divider>
-          </div>
+      <div class="cnc-availability__search">
+        <mat-form-field appearance="outline" class="cnc-availability__field">
+          <mat-label>Zip code or address</mat-label>
+          <input id="cnc-search-availability" matInput type="text" placeholder="Enter zip code or address" />
+        </mat-form-field>
       </div>
+
+      @for (ns of nearbyStores(); track ns.store.id) {
+        <mat-divider />
+        <div class="cnc-availability__result" (click)="onStoreSelect(ns.store)">
+          <h3>{{ ns.store.name }}</h3>
+          <p class="cnc-availability__address">{{ ns.store.address }}</p>
+          <p class="cnc-availability__stock">
+            @if ((ns.stock ?? 0) > 5) {
+              <mat-icon class="cnc-stock--good">room</mat-icon>
+            } @else if ((ns.stock ?? 0) > 0) {
+              <mat-icon class="cnc-stock--low">room</mat-icon>
+            } @else {
+              <mat-icon class="cnc-stock--out">room</mat-icon>
+            }
+            {{ ns.distance.toFixed(2) }} km
+          </p>
+        </div>
+        <mat-divider />
+      }
     </mat-tab>
-    <mat-tab label="Map" class="maps">
-      <cnc-maps [cartProducts]="cartProducts" [size]="data.size" [modelNo]="data.modelNo" [variantId]="data.variantId"></cnc-maps>
+
+    <mat-tab label="Map">
+      <cnc-maps
+        [cartProducts]="cartProducts()"
+        [size]="data.size ?? 0"
+        [modelNo]="data.modelNo ?? ''"
+        [variantId]="data.variantId ?? ''" />
     </mat-tab>
   </mat-tab-group>
 </div>

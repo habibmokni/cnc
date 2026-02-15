@@ -1,102 +1,99 @@
-import { Component, EventEmitter, Input, NgZone, OnInit, Output } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  OnInit,
+  NgZone,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClickNCollectService } from '../clickNCollect.service';
+import { MapsComponent } from '../maps/maps.component';
+import { Store, NearbyStore } from '../models/store.model';
+import { CncUser } from '../models/user.model';
 
 @Component({
   selector: 'cnc-store-selector',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatTabsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatDividerModule,
+    MatFormFieldModule,
+    MapsComponent,
+  ],
   templateUrl: './store-selector.component.html',
-  styleUrls: ['./store-selector.component.css']
+  styleUrl: './store-selector.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StoreSelectorComponent implements OnInit {
+  private readonly cncService = inject(ClickNCollectService);
+  private readonly ngZone = inject(NgZone);
 
-  @Input() user!: any;
-  //@Input() storeLocations: any[] = [];
-  nearByStores: {stores: any, distances: number}[] =[];
-  @Input() stores: any[] = [];
-  //  @Output() storeChanged= new EventEmitter<any>();
-  isStores = false;
-
-  constructor(
-    private ngZone: NgZone,
-    public dialog: MatDialog,
-    private cncService: ClickNCollectService
-    ) {}
-
+  readonly user = signal<CncUser | null>(null);
+  readonly stores = signal<Store[]>([]);
+  readonly nearbyStores = signal<NearbyStore[]>([]);
+  readonly isStores = signal(false);
 
   ngOnInit(): void {
-  //  this.cncService.setStoreLocations(this.storeLocations);
-  //  console.log(this.cncService.getStoreLocations());
-  //  this.cncService.setStoreList(this.stores);
-  //  console.log(this.cncService.stores);
-    this.user = this.cncService.getUser();
-    this.stores = this.cncService.getStoreList();
+    this.user.set(this.cncService.user());
+    this.stores.set(this.cncService.stores());
 
-    this.cncService.storeSelected.subscribe(store=>{
-      if(this.user){
-        this.user.storeSelected = store;
-      }else{
-        this.cncService.setUser({
-          name: 'Anonymous',
-          storeSelected: store
-        });
-        this.user = this.cncService.getUser();
+    this.cncService.storeSelected.subscribe((store) => {
+      const u = this.user();
+      if (u) {
+        this.cncService.setUser({ ...u, storeSelected: store });
+        this.user.set(this.cncService.user());
+      } else {
+        this.cncService.setUser({ name: 'Anonymous', storeSelected: store } as any);
+        this.user.set(this.cncService.user());
       }
-
     });
-    setTimeout(()=>{
 
-      const input= document.getElementById("search") as HTMLInputElement;
+    setTimeout(() => {
+      const input = document.getElementById('cnc-search-address') as HTMLInputElement;
+      if (!input) return;
 
       const autocomplete = new google.maps.places.Autocomplete(input);
+      autocomplete.addListener('place_changed', () => {
+        this.ngZone.run(() => {
+          this.nearbyStores.set([]);
+          const place = autocomplete.getPlace();
+          if (!place.geometry?.location) return;
 
-      autocomplete.addListener("place_changed", () => {
-      this.ngZone.run(() => {
-        this.nearByStores= [];
-        //get the place result
-        let place: google.maps.places.PlaceResult = autocomplete.getPlace();
-
-        //verify result
-        if (place.geometry === undefined || place.geometry === null) {
-          return;
-        }
-
-        //set latitude, longitude and zoom
-        let latitude = place.geometry.location.lat();
-        let longitude = place.geometry.location.lng();
-        let zoom = 12;
-
-        console.log(latitude + "longitude" + longitude);
-        this.cncService.find_closest_marker(latitude, longitude);
-        if(!this.isStores){
-          this.storesNearBy();
-        }else {
-          this.nearByStores = [];
-          this.storesNearBy();
-        }
-
-      });
-    });
-
-    },1000);
-
-  }
-
-  storesNearBy(){
-    let i=0;
-      for(let store of this.stores){
-        this.nearByStores.push({
-          stores: store,
-          distances: this.cncService.distanceInKm[i]
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          this.cncService.findClosestMarker(lat, lng);
+          this.computeNearbyStores();
         });
-        this.nearByStores.sort((a,b)=> a.distances-b.distances)
-        i++;
-      }
-      console.log(this.nearByStores);
-      this.isStores = true;
+      });
+    }, 1000);
   }
 
-  onStoreSelect(store: any){
+  private computeNearbyStores(): void {
+    const distances = this.cncService.distanceInKm();
+    const result: NearbyStore[] = this.stores().map((store, i) => ({
+      store,
+      distance: distances[i] ?? Infinity,
+    }));
+    result.sort((a, b) => a.distance - b.distance);
+    this.nearbyStores.set(result);
+    this.isStores.set(true);
+  }
+
+  onStoreSelect(store: Store): void {
     this.cncService.storeSelected.next(store);
-    this.nearByStores = [];
+    this.nearbyStores.set([]);
   }
 }

@@ -1,46 +1,215 @@
-.filler{
-  flex: 1 1 auto;
-}
-.mat-button-toggle-checked{
-  border: 3px solid #80808070;
-}
-.dateButton{
-  display: block;
-}
-.calendar {
-  margin-top: 5px;
-}
-.calendar_list{
-  overflow-x: auto;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  padding-bottom: 15px;
-}
-.calendar_list::-webkit-scrollbar{
-  display: none;
-}
-.calendar_list button {
-  margin-right: 5px;
-  font-family: DM Sans;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 28px;
-  border-radius: 15px;
-}
-.active {
-  text-decoration: none;
-  background: linear-gradient(180deg, #D53D5E 0%, #8B283D 100%);
-  color: white !important;
+/* ── Click & Collect Checkout ───────────────────────────── */
+
+.cnc-checkout {
+  display: flex;
+  flex-direction: column;
 }
 
-.item-image-container{
-  width: 100%;
-  height: 120px;
+/* Store header */
+.cnc-checkout__store {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-low, #f7f2fa);
+  }
 }
-.remove_button{
-  background: linear-gradient(180deg, #d53d5e 0%, #8b283d 100%);
-    color: white;
-    border-radius: 20px;
-    font-weight: bold;
-    padding: 0.5rem;
+
+.cnc-checkout__store-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: var(--mat-sys-primary, #8B283D);
+}
+
+.cnc-checkout__store-info {
+  flex: 1;
+
+  h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: var(--mat-sys-on-surface, #1c1b1f);
+  }
+}
+
+.cnc-checkout__store-address {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant, #49454f);
+  margin: 0;
+}
+
+.cnc-checkout__hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  margin: 4px 0 0;
+}
+
+/* Unavailable items */
+.cnc-checkout__unavailable {
+  padding: 0 16px;
+}
+
+.cnc-checkout__unavailable-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant, #cac4d0);
+}
+
+.cnc-checkout__item-img {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+}
+
+.cnc-checkout__item-details {
+  flex: 1;
+
+  h3 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--mat-sys-on-surface-variant, #49454f);
+  }
+}
+
+.cnc-checkout__item-price {
+  font-size: 1.125rem;
+}
+
+.cnc-checkout__remove-row {
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* No store selected */
+.cnc-checkout__no-store {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+/* Calendar */
+.cnc-checkout__slots {
+  padding: 0 16px 16px;
+}
+
+.cnc-checkout__slots-title {
+  font-size: 1.125rem;
+  margin: 16px 0 8px;
+}
+
+.cnc-checkout__calendar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.cnc-checkout__day-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 56px;
+  border-radius: 16px !important;
+  color: var(--mat-sys-primary, #8B283D);
+}
+
+.cnc-checkout__day-btn--active {
+  background: var(--mat-sys-primary, #8B283D) !important;
+  color: var(--mat-sys-on-primary, #fff) !important;
+}
+
+.cnc-checkout__day-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.cnc-checkout__day-date {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+/* Time slots */
+.cnc-checkout__time-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.cnc-checkout__time-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.cnc-checkout__filler {
+  flex: 1 1 auto;
+}
+
+.cnc-checkout__time-free {
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant, #49454f);
+}
+
+/* Empty states */
+.cnc-checkout__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 32px 16px;
+
+  h2 {
+    color: var(--mat-sys-on-surface, #1c1b1f);
+  }
+
+  p {
+    color: var(--mat-sys-on-surface-variant, #49454f);
+    margin-bottom: 16px;
+  }
+}
+
+/* Shared button style */
+.cnc-btn {
+  background: var(--mat-sys-primary, #8B283D);
+  color: var(--mat-sys-on-primary, #fff);
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+/* Stock status colors */
+.cnc-stock--good {
+  color: var(--mat-sys-primary, green);
+}
+
+.cnc-stock--low {
+  color: #e6a700;
+}
+
+.cnc-stock--out {
+  color: var(--mat-sys-error, red);
 }

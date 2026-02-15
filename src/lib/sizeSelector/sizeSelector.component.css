@@ -1,52 +1,63 @@
-.filler{
+.cnc-size__item {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 24px;
+  font-size: 1rem;
+  color: var(--mat-sys-primary, #8B283D);
+  cursor: pointer;
+}
+
+.cnc-size__item:hover {
+  background: var(--mat-sys-surface-container-low, #f7f2fa);
+}
+
+.cnc-size__item--sold-out {
+  background: var(--mat-sys-surface-dim, rgba(0, 0, 0, 0.08));
+  color: var(--mat-sys-on-surface-variant, #b8b8b8);
+}
+
+.cnc-size__filler {
   flex: 1 1 auto;
 }
-.image-container{
-  width: 100%;
-  height: 260px;
+
+.cnc-size__badge {
+  font-size: 0.8125rem;
 }
-.article-header{
+
+.cnc-size__icon {
+  padding-top: 2px;
+  color: var(--mat-sys-primary, #8B283D);
+}
+
+.cnc-size__store-info {
+  margin: 16px 0;
   text-align: center;
 }
 
-.mat-button-toggle-checked{
-  border: 3px solid #80808070;
-}
-.product_size {
-  margin-top: 5px;
-}
-.product_size_list_expansion a{
-  height: 46px;
-  font-family: DM Sans;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 46px;
-  padding: 0 24px 16px;
-}
-.active {
-  text-decoration: none;
-  background: linear-gradient(180deg, #D53D5E 0%, #8B283D 100%);
-  color: white !important;
-}
-.product_availability{
-  padding: 15px 5px;
-  margin-bottom: 60px;
-}
-.product_availability h4 {
-  font-family: Nunito;
-  font-weight: 700;
-  line-height: 27px;
-  text-align: center;
-}
-.product_availability_zipcode {
-  width: 327px;
-}
-.selected_store{
-  margin: 15px 0px;
+.cnc-size__store-address {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant, #49454f);
 }
 
-.button-container{
-  width: 90%;
-  padding: 10px;
-  margin-bottom: 50px;
+.cnc-btn {
+  background: var(--mat-sys-primary, #8B283D);
+  color: var(--mat-sys-on-primary, #fff);
+  border-radius: 20px;
+}
+
+.cnc-stock--good {
+  color: var(--mat-sys-primary, green);
+}
+
+.cnc-stock--low {
+  color: #e6a700;
+}
+
+.cnc-stock--out {
+  color: var(--mat-sys-error, red);
 }

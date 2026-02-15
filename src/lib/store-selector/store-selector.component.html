@@ -1,44 +1,47 @@
-<div class="main">
-  <div class="product_availability" fxLayout="column" fxLayoutAlign="center center">
-    <mat-card-title style="display: block;">Find stores nearby you</mat-card-title>
-    <mat-card-subtitle style="padding: 0px 15px;">Enter the location or zip code to check which nearest store has the selected product</mat-card-subtitle>
-      <div mat-dialog-content class="content">
-      <mat-tab-group mat-align-tabs="center">
-        <mat-tab label="Address">
-          <mat-form-field class="product_availability_zipcode" style="width: 230px; margin-top: 10px;">
-            <input id="search" matInput type="text" placeholder="Enter zip code or address" autofocus>
-          </mat-form-field>
-          <div *ngIf="nearByStores" style="max-width: 80%;">
-            <div *ngFor="let store of nearByStores; let i= index;">
-
-                <mat-card-content (click)="onStoreSelect(store.stores)">
-                  <button mat-button>
-                    <h2>{{store.stores.name}}</h2>
-                  </button><br />
-                  <h4 style="display: contents;">Address: {{store.stores.address}}</h4>
-                  <h5>
-                    <mat-icon fontSet="material-icons-outlined">room</mat-icon>
-                    {{store.distances.toFixed(2)}}km
-                  </h5>
-                  </mat-card-content>
-                  <mat-divider></mat-divider>
-              </div>
-          </div>
-        </mat-tab>
-        <mat-tab label="Map" class="maps">
-          <cnc-maps></cnc-maps>
-        </mat-tab>
-      </mat-tab-group>
-    </div>
-
+<div class="cnc-store-selector">
+  <div class="cnc-store-selector__header">
+    <h2 class="cnc-store-selector__title">Find stores nearby you</h2>
+    <p class="cnc-store-selector__subtitle">
+      Enter the location or zip code to check which nearest store has the selected product
+    </p>
   </div>
-      <div class="selected_store">
-        <div *ngIf="user">
-          <mat-card-content>
-            <h2>{{user.storeSelected.name}}</h2>
-            <h4 style="display: contents;">Address: {{user.storeSelected.address}}</h4>
-          </mat-card-content>
 
-        </div>
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+    <!-- Address tab -->
+    <mat-tab label="Address">
+      <div class="cnc-store-selector__search">
+        <mat-form-field appearance="outline" class="cnc-store-selector__field">
+          <mat-label>Zip code or address</mat-label>
+          <input id="cnc-search-address" matInput type="text" placeholder="Enter zip code or address" />
+        </mat-form-field>
       </div>
+
+      @for (ns of nearbyStores(); track ns.store.id) {
+        <div class="cnc-store-selector__result" (click)="onStoreSelect(ns.store)">
+          <button mat-button>
+            <h3>{{ ns.store.name }}</h3>
+          </button>
+          <p class="cnc-store-selector__address">{{ ns.store.address }}</p>
+          <p class="cnc-store-selector__distance">
+            <mat-icon fontSet="material-icons-outlined">room</mat-icon>
+            {{ ns.distance.toFixed(2) }} km
+          </p>
+          <mat-divider />
+        </div>
+      }
+    </mat-tab>
+
+    <!-- Map tab -->
+    <mat-tab label="Map">
+      <cnc-maps />
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Selected store -->
+  @if (user(); as u) {
+    <div class="cnc-store-selector__selected">
+      <h3>{{ u.storeSelected.name }}</h3>
+      <p>{{ u.storeSelected.address }}</p>
+    </div>
+  }
 </div>

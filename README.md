@@ -1,156 +1,172 @@
-# ClickNCollect
+# @habibmokni/cnc
 
-ClickNCollect is an angular library which helps to integrate clickNCollect feature to any e-commerce website.
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.0.5.
+> **Click & Collect** Angular library — store selector, size picker, stock checks, and Google Maps integration for e-commerce apps.
 
-# Click and Collect component
+[![Angular](https://img.shields.io/badge/Angular-21-dd0031)](https://angular.dev)
+[![Material](https://img.shields.io/badge/Material-3-6750A4)](https://material.angular.io)
 
-This component provides a click and collect solution for any e-commerce website. that implements the
-[Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/tutorial).
+---
+
+## What's new in v2
+
+| Area | v1 (Angular 12) | v2 (Angular 21) |
+|------|-----------------|-----------------|
+| Components | NgModule-based | **Standalone** components |
+| State | `@Input` / `@Output` decorators | **Signals** (`input`, `output`, `signal`, `computed`) |
+| DI | Constructor injection | **`inject()`** function |
+| Change Detection | Default | **`OnPush`** everywhere |
+| Layout | `@angular/flex-layout` | **CSS Flexbox** (no runtime dep) |
+| Styling | Hard-coded colors | **Material 3 CSS custom properties** (`--mat-sys-*`) |
+| Types | `any` everywhere | **Typed models** (`Store`, `CncUser`, `CartProduct`, etc.) |
+| Maps | Bundled Google Maps JS | **`@angular/google-maps` v21** (consumer loads API) |
+
+---
 
 ## Installation
 
-To install, run `npm install @habibmokni/cnc`.
-
-## Prerequisite
-
-Click and Collect library uses google maps api for displaying store lcoations on the map and also uses google maps places feature to get the user's enter location and then list the stores with shortest distance from that location.
-So google maps api key is required. Follow following steps to get your own api key and integrate into your project.
-- First follow [these steps](https://developers.google.com/maps/gmp-get-started) to get an API key that can be used to load Google Maps.
-- Load the [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/tutorial#Loading_the_Maps_API).
-- The Google Maps JavaScript API must be loaded before the `Click and Collect` component.
-
-```html
-<!-- index.html -->
-<!doctype html>
-<head>
-  ...
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
-</head>
+```bash
+npm install @habibmokni/cnc
 ```
 
-**Note:**
-If you want to learn more about how to use google maps api in any angular project you can jump to this guide [@angular/google-maps](https://github.com/angular/components/tree/master/src/google-maps)
+### Peer dependencies
 
-## Activating the package
+```
+@angular/core         ^21.0.0
+@angular/common       ^21.0.0
+@angular/forms        ^21.0.0
+@angular/router       ^21.0.0
+@angular/material     ^21.0.0
+@angular/cdk          ^21.0.0
+@angular/google-maps  ^21.0.0
+```
 
-Complete clickNCollect package features are unlocked by importing the ClickNCollectModule as shown below. After importing the package you just have to add selectors to your html templates and clickNCollect features will be implemented in them. The <cnc-click-n-collect> selector is used for checkout. It provides the main click and collect logic. <cnc-size-selector> is used mainly in article/product page to get the product size and enable store selector if required. <cnc-store-selector> is used mainly used to give user a option to select a store preference. User can either select store by adding postal code/address or by selecting the a store from map. These are the three main features offered by click and collect package and are discussed in detail below.
+---
+
+## Quick start
+
+### 1. Import the module (backward-compatible)
 
 ```typescript
-// clickandcollect-demo.module.ts
-
-import { NgModule } from '@angular/core';
 import { ClickNCollectModule } from '@habibmokni/cnc';
-import { CommonModule } from '@angular/common';
-import { HttpClientModule, HttpClientJsonpModule } from '@angular/common/http';
 
-import { GoogleMapsDemoComponent } from './google-maps-demo.component';
+bootstrapApplication(AppComponent, {
+  providers: [importProvidersFrom(ClickNCollectModule)],
+});
+```
 
-@NgModule({
-  declarations: [
-    GoogleMapsDemoComponent,
-  ],
-  imports: [
-    CommonModule,
-    ClickNCollectModule,
-    HttpClientModule,
-    HttpClientJsonpModule,
-  ],
-  exports: [
-    ClickAndCollectDemoComponent,
-  ],
-})
-export class ClickAndCollectDemoModule {}
+**Or** import standalone components directly:
 
-
-// google-maps-demo.component.ts
-
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+```typescript
+import { StoreSelectorComponent, SizeSelectorComponent } from '@habibmokni/cnc';
 
 @Component({
-  selector: 'click-and-collect-demo',
-  templateUrl: './click-n-collect.component.html',
+  imports: [StoreSelectorComponent, SizeSelectorComponent],
+  // ...
 })
-export class GoogleMapsDemoComponent {
-  //inject clickNCollect service and provide following data
-  constructor(private cncService: ClickNCollectService) {
-    this.cncService.setStoreList('your storeList'); //provide your store list here
-    this.cncService.setCartProducts('your cart products'); //provide your cart products here
-    this.cncService.setUser('your user'); //provide your user here
-      
+export class MyComponent {}
+```
+
+### 2. Bridge data via the service
+
+```typescript
+import { ClickNCollectService } from '@habibmokni/cnc';
+
+export class AppComponent {
+  private cncService = inject(ClickNCollectService);
+
+  ngOnInit() {
+    this.cncService.setStoreList(stores);
+    this.cncService.setStoreLocations(locations);
+    this.cncService.setUser(user);
+    this.cncService.setCartProducts(cartProducts);
+
+    this.cncService.storeSelected.subscribe(store => {
+      console.log('Store selected:', store);
+    });
   }
+}
 ```
 
+### 3. Use in templates
+
 ```html
-<!-- google-maps-demo.component.html -->
+<!-- Store selector page (map + address search) -->
+<cnc-store-selector />
 
-<div>
-  <cnc-click-n-collect></cnc-click-n-collect>
-</div>
-```
+<!-- Size picker with stock awareness -->
+<cnc-size-selector [product]="product" (sizeSelected)="onSize($event)" />
 
-## Components
-
-- [`clickNCollect`](./)
-- [`storeSelector`](./storeSelector)
-- [`sizeSelector`](./sizeSelector)
-- [`productAvailability`](./productAvailability)
-- [`checkAvailability`](./checkAvailability)
-- [`maps`](./maps)
-
-## Services
-
-- [`clickNCollect`](./)
-
-
-## clickNCollect Component
-
-The Click and collect components implement following options for their respective object:
-- ['user'] - Click and collect requires a user object. This user object tells the clickNCollect component that which store is selected by the user and perform calculations accordingly.
-- ['storeChanged'] - storeChanged event replies back the store changed by the user.
-- ['productsToRemove'] - this event is trigered when there are unavailable items in cart and user wants to remove them. So it gets trigered.
-- ['dateSelected'] - this event trigers when date is selected and returns the selected date
-- ['timeSelected'] - this event trigers when time is selected and returns the selected time
-- ['isAllItemsAvailable'] - this event get trigers automatically by clickNCollect component and is used to tell whether all items of cart are available or not
-```html
+<!-- Full checkout flow -->
 <cnc-click-n-collect
-        [user]="YourUser"
-        (storeChanged)="YourMethod($event)"
-        (productsToRemove)="YourMethod($event)"
-        (dateSelected)="YourMethod($event)"
-        (timeSelected)="YourMethod($event)"
-        (isAllItemsAvailable)="YourMethod($event)"
-      >
-      </cnc-click-n-collect>
+  [user]="user"
+  [cartProducts]="cart"
+  (dateSelected)="onDate($event)"
+  (timeSelected)="onTime($event)"
+  (storeChanged)="onStore($event)" />
 ```
 
-## storeSelector Component
+### 4. Google Maps
 
-This component of Click and collect is used to activate store selection feature. storeSelector provides an interface to the user to select the store from either list of stores by entering zip code/address or by google maps.
+The consuming app must load the Google Maps JavaScript API (e.g. via a `<script>` tag in `index.html`):
 
 ```html
-<cnc-store-selector></cnc-store-selector>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
 ```
 
-## sizeSelector Component
+---
 
-This component of click and collect is used to activate size selection feature of click and collect. Size selector extends the features of storeSelector by providing extra details as product size and product variant and then providing the list of stores which has that product in stock.
-- ['user'] - sizeSelector aslso requires a user object. This user object tells the clickNCollect component that which store is selected by the user and perform calculations accordingly.
-- ['product'] - size selector requries a product object. Size selector compares this product with all the stores and check the stock and give results accordingly.
-- ['sizeSelected'] - this event is trigered when user selects a size.
+## Exported components
 
-```html
-<cnc-size-selector
-        [user]="YourUser"
-        [product]="userselectedproduct"
-        (sizeSelected)="YourMethod($event)"
-      >
-      </cnc-size-selector>
+| Selector | Description |
+|----------|-------------|
+| `<cnc-click-n-collect>` | Main checkout flow (store + date/time picker + stock checks) |
+| `<cnc-store-selector>` | Google Maps store picker with address autocomplete |
+| `<cnc-size-selector>` | Size picker with per-store stock awareness |
+| `<cnc-product-availability>` | Store availability dialog |
+| `<cnc-check-availability>` | Size-aware availability checker dialog |
+| `<cnc-maps>` | Google Maps wrapper with markers, info windows, directions |
+
+---
+
+## Models
+
+```typescript
+import { Store, CncUser, CartProduct, NearbyStore } from '@habibmokni/cnc';
 ```
 
-**Note:**
-All these options are required for proper functioning of click and collect feature as it needs a way to communicate with the application.
+See `src/lib/models/` for full type definitions.
 
+---
+
+## Theming
+
+All components use Material 3 CSS custom properties. They automatically inherit the consuming app's theme:
+
+```css
+/* Components respond to these tokens */
+--mat-sys-primary
+--mat-sys-on-primary
+--mat-sys-surface-container
+--mat-sys-on-surface
+--mat-sys-on-surface-variant
+--mat-sys-error
+```
+
+Both **light mode** and **dark mode** are supported out of the box.
+
+---
+
+## Building
+
+```bash
+npm run build          # development build
+npm run build:prod     # production build (partial compilation)
+```
+
+Output is written to `dist/`.
+
+---
+
+## License
+
+MIT

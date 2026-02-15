@@ -1,286 +1,194 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { MapInfoWindow, MapMarker } from '@angular/google-maps';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  input,
+  signal,
+  viewChild,
+  OnInit,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
+import {
+  GoogleMapsModule,
+  MapInfoWindow,
+  MapMarker,
+} from '@angular/google-maps';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable} from 'rxjs';
 import { ClickNCollectService } from '../clickNCollect.service';
-
+import { Store } from '../models/store.model';
+import { CartProduct } from '../models/cart.model';
 
 @Component({
   selector: 'cnc-maps',
+  standalone: true,
+  imports: [CommonModule, GoogleMapsModule, MatButtonModule, MatIconModule],
   templateUrl: './maps.component.html',
-  styleUrls: ['./maps.component.css']
+  styleUrl: './maps.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MapsComponent implements OnInit {
-  //instance of MapInfoWindow
-  @ViewChild(MapInfoWindow) infoWindow!: MapInfoWindow ;
-  //if user wants to set maps height and width
-  @Input() mapHeight: number= 450;
-  @Input() mapWidth: number= screen.width;
-  //necessary info to run comparison
-  @Input() modelNo: any;
-  @Input() size: number = 0;
-  @Input() variantId: string = '';
-  //to get cartProducts
-  @Input() cartProducts: any[] = [];
-  //custom styles for google maps
-  styleArray: google.maps.MapTypeStyle[] =
-    [
-      {
-        "featureType": "administrative",
-        "elementType": "all",
-        "stylers": [
-            {
-                "visibility": "simplified"
-            }
-        ]
-      },
-      {
-        "featureType": "landscape",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "visibility": "simplified"
-            },
-            {
-                "color": "#fcfcfc"
-            }
-        ]
-      },
-      {
-        "featureType": "poi",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "visibility": "simplified"
-            },
-            {
-                "color": "#fcfcfc"
-            }
-        ]
-      },
-      {
-        "featureType": "road.highway",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "visibility": "simplified"
-            },
-            {
-                "color": "#dddddd"
-            }
-        ]
-      },
-      {
-        "featureType": "road.arterial",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "visibility": "simplified"
-            },
-            {
-                "color": "#dddddd"
-            }
-        ]
-      },
-      {
-        "featureType": "road.local",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "visibility": "simplified"
-            },
-            {
-                "color": "#eeeeee"
-            }
-        ]
-      },
-      {
-        "featureType": "water",
-        "elementType": "geometry",
-        "stylers": [
-            {
-                "visibility": "simplified"
-            },
-            {
-                "color": "#dddddd"
-            }
-        ]
-      }
-    ]
-  // options to style and adjust the google map
-  options: google.maps.MapOptions = {
-    center: {lat: 51.44157584725519, lng: 7.565725496333208},
+  private readonly cncService = inject(ClickNCollectService);
+  private readonly dialog = inject(MatDialog);
+
+  readonly infoWindow = viewChild<MapInfoWindow>('infoWindow');
+
+  // ── Inputs ─────────────────────────────────────────────────────
+  readonly mapHeight = input<number>(450);
+  readonly mapWidth = input<number>(typeof screen !== 'undefined' ? screen.width : 400);
+  readonly modelNo = input<string>('');
+  readonly size = input<number>(0);
+  readonly variantId = input<string>('');
+  readonly cartProducts = input<CartProduct[]>([]);
+
+  // ── Local state ────────────────────────────────────────────────
+  readonly isStoreSelected = signal(false);
+  readonly currentStore = signal<Store | null>(null);
+  readonly storeLocations = signal<google.maps.LatLngLiteral[]>([]);
+  readonly storeList = signal<Store[]>([]);
+
+  readonly currentUserLocation = signal<google.maps.LatLngLiteral>({
+    lat: 31.4914,
+    lng: 74.2385,
+  });
+
+  /** Custom map styles */
+  readonly mapStyles: google.maps.MapTypeStyle[] = [
+    { featureType: 'administrative', elementType: 'all', stylers: [{ visibility: 'simplified' }] },
+    { featureType: 'landscape', elementType: 'geometry', stylers: [{ visibility: 'simplified' }, { color: '#fcfcfc' }] },
+    { featureType: 'poi', elementType: 'geometry', stylers: [{ visibility: 'simplified' }, { color: '#fcfcfc' }] },
+    { featureType: 'road.highway', elementType: 'geometry', stylers: [{ visibility: 'simplified' }, { color: '#dddddd' }] },
+    { featureType: 'road.arterial', elementType: 'geometry', stylers: [{ visibility: 'simplified' }, { color: '#dddddd' }] },
+    { featureType: 'road.local', elementType: 'geometry', stylers: [{ visibility: 'simplified' }, { color: '#eeeeee' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ visibility: 'simplified' }, { color: '#dddddd' }] },
+  ];
+
+  readonly options = signal<google.maps.MapOptions>({
+    center: { lat: 51.44157584725519, lng: 7.565725496333208 },
     zoom: 8,
-    styles: this.styleArray
-  };
-  //options that are used for marker styling and animation
-  markerOptions: google.maps.MarkerOptions = {
+    styles: this.mapStyles,
+  });
+
+  readonly markerOptions: google.maps.MarkerOptions = {
     draggable: false,
-    animation: google.maps.Animation.DROP
+    animation: google.maps.Animation.DROP,
   };
 
-  isStoreSelected = false;
-  user: any;
-  currentStore: any;
-  //storeLocations: {lat: number, lng: number}[];
-  storeList : any[] = [];
+  readonly currentLocation = signal<google.maps.LatLngLiteral>({
+    lat: 51.44157584725519,
+    lng: 7.565725496333208,
+  });
 
-  currentUserLocation: google.maps.LatLngLiteral = { lat: 31.4914, lng: 74.2385};
-  currentLocation: google.maps.LatLngLiteral = { lat: 51.44157584725519, lng: 7.565725496333208};
-  label={
-    text: "#xe56a", // codepoint from https://fonts.google.com/icons
-      fontFamily: "Material Icons",
-      color: "#ffffff",
-      fontSize: "18px"
-  };
-  icon = {
-    url: "https://fonts.google.com/icons?selected=Material%20Icons%20Outlined%3Awhere_to_vote%3A", // url
-  };
-  //stores direction result
-  directionsResults$!: Observable<google.maps.DirectionsResult|undefined>;
+  directionsResults$!: Observable<google.maps.DirectionsResult | undefined>;
 
-  storeLocations: google.maps.LatLngLiteral[];
-
-  constructor(
-    private cncService: ClickNCollectService,
-    private dialog: MatDialog
-    ){
-      //console.log(this.storeLocations);
-      this.storeLocations = this.cncService.getStoreLocations();
-      console.log(this.storeLocations);
-    }
   ngOnInit(): void {
-    //getting storeList and user data
-    this.storeList = this.cncService.getStoreList();
-    this.user = this.cncService.getUser();
-    this.currentStore = this.storeList[0];
-    //check if size is already selected
-    if(this.size>0){
-      this.checkProductAvailabilty(this.modelNo, this.size, this.variantId)
-    }else{
-      //check if cart products are available
-      if(this.cartProducts.length>0){
-        this.checkAllProductsAvailabilty(this.cartProducts);
-      }
+    this.storeLocations.set(this.cncService.markerPositions());
+    this.storeList.set(this.cncService.stores());
+    this.currentStore.set(this.storeList()[0] ?? null);
+
+    const s = this.size();
+    if (s > 0) {
+      this.checkProductAvailability(this.modelNo(), s, this.variantId());
+    } else if (this.cartProducts().length > 0) {
+      this.checkAllProductsAvailability(this.cartProducts());
     }
   }
-  //function to get current user location
-  onGetCurrentLocation(){
-    this.cncService.getCurrentLocation()
-    setTimeout(()=>{
-      this.options = {
-        center: this.cncService.currentLocation
-      };
-      this.currentUserLocation = this.cncService.currentLocation;
-    },500)
+
+  onGetCurrentLocation(): void {
+    this.cncService.getCurrentLocation();
+    setTimeout(() => {
+      this.options.set({ center: this.cncService.currentLocation() });
+      this.currentUserLocation.set(this.cncService.currentLocation());
+    }, 500);
   }
-  //function to get directions to selected store
-  onGetDirections(location: any){
+
+  onGetDirections(location: { lat: number; lng: number }): void {
     this.cncService.getDirections(location);
     this.directionsResults$ = this.cncService.storeDirectionsResults$;
-    this.options.zoom=2;
-  }
-  //triggers when marker is selected and opens infowindow
-  openInfoWindow(marker: MapMarker, store: any, event: google.maps.MapMouseEvent) {
-    this.currentStore = store;
-    this.infoWindow.open(marker);
-    this.cncService.currentStoreLocation = event.latLng.toJSON();
-  }
-  //when store is selected
-  onStoreSelect(store: any){
-    //if user exists store updated
-    if(this.user){
-      this.cncService.storeSelected.next(store);
-      //if user does not exist then new user created
-    }else {
-      this.cncService.setUser({
-        name: 'Anonymous',
-        storeSelected: store
-      })
-      this.cncService.storeSelected.next(store);
-    }
-    this.infoWindow.close();
-    this.dialog.closeAll();
-    this.isStoreSelected = true;
-  }
-  //checks if the selected product is avaialble in the store or not
-  checkProductAvailabilty(modelNo: string, productSize: number,  variantId: string){
-    let i=0;
-    console.log(this.storeList)
-    let newLocations = [];
-    let newStore = [];
-    for(let store of this.storeList){         //running store loop
-      for(let product of store.products){
-        if(product.modelNo === modelNo){      //if store product matches modelno of selected product
-          console.log("model true");
-          for(let variant of product.variants){       //running variants loop
-            if(variant.variantId === variantId){        //if variantId matches product variant id
-              for(let index=0; index<variant.sizes.length; index++){
-                console.log(productSize);
-                if(+variant.sizes[index] === +productSize && +variant.inStock[index]>0){  //(+)sign is to convert string to number
-                  console.log(variant.sizes[index]);
-                  newLocations.push(this.storeLocations[i]);
-                  console.log(newLocations);
-                  newStore.push(this.storeList[i]);
-               }
-              }
-            }
-          }
-        }
-      }
-      i++;
-    }
-    //adding new locations to storelocations
-    this.storeLocations = newLocations;
-    this.storeList = newStore;
-  }
-  //triggers when in checkout page and checks whether all products available or not
-  checkAllProductsAvailabilty(cartProducts: any[]){
-    let i=0;
-    let newLocations: google.maps.LatLngLiteral[] = [];
-    let newStores: any[] = [];
-    let allProducts = 0;
-    //loop for stores in storeList
-    for(let store of this.storeList){
-      allProducts = 0;
-      //looping through products of each store
-      for(let product of store.products){
-        //looping thorugh cart products
-        for(let a=0; a<cartProducts.length; a++){
-          if(product.modelNo === cartProducts[a].modelNo){  //if modelNo matched
-            console.log('map model match');
-            //looping through variants of each product
-            for(let variant of product.variants){
-              if(variant.variantId === cartProducts[a].variantId){   //if variantId matched
-                //looping through each size
-                for(let index=0; index<variant.sizes.length; index++){
-                  //if size matches and noOfItems in stock does not exceed
-                  if(+variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems){
-                    allProducts++;
-                    console.log('this is stock of cart products' + cartProducts[a].noOfItems + 'variant' + variant.inStock[index]);
-                    console.log(allProducts);
-                 }
-                }
-              }
-            }
-          }
-        }
-      }
-      //if all products available in that store location and store is pushed
-      console.log(allProducts);
-      if(allProducts === cartProducts.length){
-        newLocations.push(this.storeLocations[i]);
-        console.log(newLocations);
-        newStores.push(this.storeList[i]);
-        console.log(this.storeList[i]);
-      }
-      i++;
-    }
-    this.storeLocations = newLocations;
-    this.storeList = newStores;
-  }
-  reselectStore(){
-    this.isStoreSelected = false;
+    this.options.update((o) => ({ ...o, zoom: 2 }));
   }
 
+  openInfoWindow(marker: MapMarker, store: Store, event: google.maps.MapMouseEvent): void {
+    this.currentStore.set(store);
+    this.infoWindow()?.open(marker);
+    if (event.latLng) {
+      this.cncService.currentStoreLocation = event.latLng.toJSON();
+    }
+  }
+
+  onStoreSelect(store: Store): void {
+    const user = this.cncService.user();
+    if (user) {
+      this.cncService.storeSelected.next(store);
+    } else {
+      this.cncService.setUser({ name: 'Anonymous', storeSelected: store } as any);
+      this.cncService.storeSelected.next(store);
+    }
+    this.infoWindow()?.close();
+    this.dialog.closeAll();
+    this.isStoreSelected.set(true);
+  }
+
+  reselectStore(): void {
+    this.isStoreSelected.set(false);
+  }
+
+  // ── Availability checks ────────────────────────────────────────
+  private checkProductAvailability(modelNo: string, productSize: number, variantId: string): void {
+    const allLocations = this.storeLocations();
+    const allStores = this.storeList();
+    const newLocations: google.maps.LatLngLiteral[] = [];
+    const newStores: Store[] = [];
+
+    allStores.forEach((store, i) => {
+      for (const product of store.products) {
+        if (product.modelNo !== modelNo) continue;
+        for (const variant of product.variants) {
+          if (variant.variantId !== variantId) continue;
+          for (let j = 0; j < variant.sizes.length; j++) {
+            if (+variant.sizes[j] === +productSize && +variant.instock[j] > 0) {
+              newLocations.push(allLocations[i]);
+              newStores.push(allStores[i]);
+            }
+          }
+        }
+      }
+    });
+
+    this.storeLocations.set(newLocations);
+    this.storeList.set(newStores);
+  }
+
+  private checkAllProductsAvailability(cart: CartProduct[]): void {
+    const allLocations = this.storeLocations();
+    const allStores = this.storeList();
+    const newLocations: google.maps.LatLngLiteral[] = [];
+    const newStores: Store[] = [];
+
+    allStores.forEach((store, i) => {
+      let matched = 0;
+      for (const product of store.products) {
+        for (const cp of cart) {
+          if (product.modelNo !== cp.modelNo) continue;
+          for (const variant of product.variants) {
+            if (variant.variantId !== cp.variantId) continue;
+            for (let j = 0; j < variant.sizes.length; j++) {
+              if (+variant.sizes[j] === cp.size && +variant.instock[j] >= cp.noOfItems) {
+                matched++;
+              }
+            }
+          }
+        }
+      }
+      if (matched === cart.length) {
+        newLocations.push(allLocations[i]);
+        newStores.push(allStores[i]);
+      }
+    });
+
+    this.storeLocations.set(newLocations);
+    this.storeList.set(newStores);
+  }
 }

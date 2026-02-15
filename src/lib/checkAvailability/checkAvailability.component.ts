@@ -1,160 +1,118 @@
-import { Component, Inject, Input, NgZone, OnInit } from '@angular/core';
-import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  OnInit,
+  NgZone,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClickNCollectService } from '../clickNCollect.service';
+import { MapsComponent } from '../maps/maps.component';
+import { Store, NearbyStore } from '../models/store.model';
 
 @Component({
   selector: 'cnc-check-availability',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogModule,
+    MatCardModule,
+    MatTabsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatDividerModule,
+    MatFormFieldModule,
+    MapsComponent,
+  ],
   templateUrl: './checkAvailability.component.html',
-  styleUrls: ['./checkAvailability.component.css']
+  styleUrl: './checkAvailability.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckAvailabilityComponent implements OnInit {
+  private readonly ngZone = inject(NgZone);
+  private readonly cncService = inject(ClickNCollectService);
+  readonly data: any = inject(MAT_DIALOG_DATA);
 
-
-  nearByStores: {stores: any, distances: number, stock: number}[] =[];
-  productAvailabilty: string[] = [];
-  @Input() stores: any[] = [];
-  size=0;
-  cartProducts: any[] = [];
-  isSizeSelected = false;
-
-  constructor(
-    private ngZone: NgZone,
-    private cncService: ClickNCollectService,
-    private dialog: MatDialog,
-    @Inject(MAT_DIALOG_DATA) public data: any
-    ) {
-      this.stores = cncService.getStoreList();
-    }
+  readonly stores = signal<Store[]>(this.cncService.stores());
+  readonly nearbyStores = signal<NearbyStore[]>([]);
+  readonly size = signal(0);
+  readonly isSizeSelected = signal(false);
 
   ngOnInit(): void {
-    if(this.data.size){
-      this.size = this.data.size;
-      this.isSizeSelected = true;
+    if (this.data.size) {
+      this.size.set(this.data.size);
+      this.isSizeSelected.set(true);
     }
 
-    setTimeout(()=>{
-      //accessing input search element
-      const input= document.getElementById("search") as HTMLInputElement;
-      //google autocomplete search linking with input
+    setTimeout(() => {
+      const input = document.getElementById('cnc-search-check') as HTMLInputElement;
+      if (!input) return;
+
       const autocomplete = new google.maps.places.Autocomplete(input);
-      //listening to changes in place
-      autocomplete.addListener("place_changed", () => {
+      autocomplete.addListener('place_changed', () => {
         this.ngZone.run(() => {
-          this.nearByStores= [];
-          //get the place result
-          let place: google.maps.places.PlaceResult = autocomplete.getPlace();
-          //verify result
-          if (place.geometry === undefined || place.geometry === null) {
-            return;
-          }
-          //set latitude, longitude and zoom
-          let latitude = place.geometry.location.lat();
-          let longitude = place.geometry.location.lng();
-          let zoom = 12;
-          //finding closest stores
-          this.cncService.find_closest_marker(latitude, longitude);
+          this.nearbyStores.set([]);
+          const place = autocomplete.getPlace();
+          if (!place.geometry?.location) return;
+
+          const lat = place.geometry.location.lat();
+          const lng = place.geometry.location.lng();
+          this.cncService.findClosestMarker(lat, lng);
           setTimeout(() => {
-            this.checkProductAvailabilty(this.data.modelNo,this.size, this.data.variantId);
+            this.checkProductAvailability(this.data.modelNo, this.size(), this.data.variantId);
           }, 100);
-          console.log(this.nearByStores);
         });
       });
-    },500);
-  }
-  //check for single product availability
-  checkProductAvailabilty(modelNo: string, productSize: number, variantId: string){
-    let i=0;
-    //looping stores
-    for(let store of this.stores){
-      //looping products of each store
-      for(let product of store.products){
-        //if modelNo matches
-        if(product.modelNo === modelNo){
-          //looping variants of product
-          for(let variant of product.variants){
-            //if variant matches
-            if(variant.variantId === variantId){
-              //looping sizes
-              for(let index=0; index<variant.sizes.length; index++){
-                if(+variant.sizes[index] === +productSize){ // + sign is to ensure number type
-                  this.nearByStores.push({
-                    stores: store,
-                    stock: +variant.inStock[index],
-                    distances: this.cncService.distanceInKm[i]
-                  });
-                  console.log(this.nearByStores);
-                }
-                //sorting with shortest distance
-                this.nearByStores.sort((a,b)=> a.distances-b.distances)
-              }
-            }
-          }
-        }
-      }
-      i++;
-    }
-    console.log(this.nearByStores);
+    }, 500);
   }
 
-  //checks if all cart products are in the store or not
-  checkAllProductsAvailabilty(cartProducts: any[]){
-    let i=0;
-    let isAvailable = 0;
-    //looping through stores
-    for(let store of this.stores){
-    console.log('store changed');
-    //looping each product of store
-      for(let product of store.products){
-        //looping cart products
-        for(let a=0; a<cartProducts.length; a++){
-          //matching product modelNo
-          if(product.modelNo === cartProducts[a].modelNo){
-            for(let variant of product.variants){
-              //matching variants
-              if(variant.variantId === cartProducts[a].variantId){
-                for(let index=0; index<variant.sizes.length; index++){
-                  //if size matches and variant stock does not exceed store stock limit
-                  if(variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] >= cartProducts[a].noOfItems!){
-                    isAvailable = 10;
-                    console.log('product found with all the requirements');
-                  }
-                  //if size matches and variant stock does exceeds store stock limit
-                  if(variant.sizes[index] === cartProducts[a].size && +variant.inStock[index] <= cartProducts[a].noOfItems!){
-                    isAvailable = 0;
-                    console.log('no of items in cart exceed no of items available');
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      //pushing store to nearbyStores
-      this.nearByStores.push({
-        stores: store,
-        stock: isAvailable,
-        distances: this.cncService.distanceInKm[i]
-      });
-      //sorting with shortest distance
-      this.nearByStores.sort((a,b)=> a.distances-b.distances);
-      i++;
-    }
+  changeSize(newSize: number): void {
+    this.nearbyStores.set([]);
+    this.size.set(newSize);
+    this.isSizeSelected.set(true);
   }
-  //if user wants to change size
-  changeSize(size: any){
-    if(this.nearByStores){
-     this.nearByStores = [];
-    }
-    this.size = size;
-    this.isSizeSelected = true;
-  }
-  //get user current Location
-  currentLocation(){
+
+  currentLocation(): void {
     this.cncService.getCurrentLocation();
-    setTimeout(()=>{
-      this.nearByStores = [];
-      this.checkProductAvailabilty(this.data.modelNo,this.size, this.data.variantId);
-    },1000)
+    setTimeout(() => {
+      this.nearbyStores.set([]);
+      this.checkProductAvailability(this.data.modelNo, this.size(), this.data.variantId);
+    }, 1000);
   }
 
+  private checkProductAvailability(modelNo: string, productSize: number, variantId: string): void {
+    const results: NearbyStore[] = [];
+    const distances = this.cncService.distanceInKm();
+
+    this.stores().forEach((store, i) => {
+      for (const product of store.products) {
+        if (product.modelNo !== modelNo) continue;
+        for (const variant of product.variants) {
+          if (variant.variantId !== variantId) continue;
+          for (let j = 0; j < variant.sizes.length; j++) {
+            if (+variant.sizes[j] === +productSize) {
+              results.push({
+                store,
+                stock: +variant.instock[j],
+                distance: distances[i] ?? Infinity,
+              });
+            }
+          }
+        }
+      }
+    });
+
+    results.sort((a, b) => a.distance - b.distance);
+    this.nearbyStores.set(results);
+  }
 }
