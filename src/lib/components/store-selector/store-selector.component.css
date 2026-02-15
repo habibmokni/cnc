@@ -1,69 +1,69 @@
 .cnc-store-selector {
-  padding: 0 24px;
+	padding: 0 24px;
 }
 
 .cnc-store-selector__header {
-  padding: 16px 0;
-  text-align: center;
+	padding: 16px 0;
+	text-align: center;
 }
 
 .cnc-store-selector__title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--mat-sys-on-surface, #1c1b1f);
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: var(--mat-sys-on-surface, #1c1b1f);
 }
 
 .cnc-store-selector__subtitle {
-  font-size: 0.875rem;
-  color: var(--mat-sys-on-surface-variant, #49454f);
-  padding: 0 16px;
+	font-size: 0.875rem;
+	color: var(--mat-sys-on-surface-variant, #49454f);
+	padding: 0 16px;
 }
 
 .cnc-store-selector__search {
-  display: flex;
-  justify-content: center;
-  padding: 12px 0;
+	display: flex;
+	justify-content: center;
+	padding: 12px 0;
 }
 
 .cnc-store-selector__field {
-  width: 100%;
-  max-width: 360px;
+	width: 100%;
+	max-width: 360px;
 }
 
 .cnc-store-selector__result {
-  cursor: pointer;
-  padding: 8px 0;
+	cursor: pointer;
+	padding: 8px 0;
 }
 
 .cnc-store-selector__result:hover {
-  background: var(--mat-sys-surface-container-low, #f7f2fa);
+	background: var(--mat-sys-surface-container-low, #f7f2fa);
 }
 
 .cnc-store-selector__address {
-  font-size: 0.875rem;
-  color: var(--mat-sys-on-surface-variant, #49454f);
-  margin: 0 16px;
+	font-size: 0.875rem;
+	color: var(--mat-sys-on-surface-variant, #49454f);
+	margin: 0 16px;
 }
 
 .cnc-store-selector__distance {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8125rem;
-  color: var(--mat-sys-on-surface-variant, #49454f);
-  margin: 4px 16px 0;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.8125rem;
+	color: var(--mat-sys-on-surface-variant, #49454f);
+	margin: 4px 16px 0;
 }
 
 .cnc-store-selector__distance mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
 }
 
 .cnc-store-selector__selected {
-  margin: 16px 0;
-  text-align: center;
-  padding: 16px;
-  border-radius: 12px;
-  background: var(--mat-sys-surface-container, #f3edf7);
+	margin: 16px 0;
+	text-align: center;
+	padding: 16px;
+	border-radius: 12px;
+	background: var(--mat-sys-surface-container, #f3edf7);
 }

@@ -1,82 +1,82 @@
 .cnc-check,
 .cnc-check__size-picker {
-  padding: 16px;
+	padding: 16px;
 }
 
 .cnc-check__title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--mat-sys-on-surface, #1c1b1f);
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: var(--mat-sys-on-surface, #1c1b1f);
 }
 
 .cnc-check__subtitle {
-  font-size: 0.875rem;
-  color: var(--mat-sys-on-surface-variant, #49454f);
+	font-size: 0.875rem;
+	color: var(--mat-sys-on-surface-variant, #49454f);
 }
 
 .cnc-check__size-item {
-  display: block;
-  height: 46px;
-  line-height: 46px;
-  padding: 0 24px;
-  font-size: 1rem;
-  color: var(--mat-sys-primary, #8B283D);
-  cursor: pointer;
+	display: block;
+	height: 46px;
+	line-height: 46px;
+	padding: 0 24px;
+	font-size: 1rem;
+	color: var(--mat-sys-primary, #8b283d);
+	cursor: pointer;
 }
 
 .cnc-check__size-item:hover {
-  background: var(--mat-sys-surface-container-low, #f7f2fa);
+	background: var(--mat-sys-surface-container-low, #f7f2fa);
 }
 
 .cnc-check__size-btn {
-  width: 100%;
-  text-align: start;
-  margin-bottom: 8px;
+	width: 100%;
+	text-align: start;
+	margin-bottom: 8px;
 }
 
 .cnc-check__search-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 0;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 0;
 }
 
 .cnc-check__field {
-  flex: 1;
+	flex: 1;
 }
 
 .cnc-check__result {
-  padding: 8px 0;
+	padding: 8px 0;
 }
 
 .cnc-check__result-header {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
 
 .cnc-check__filler {
-  flex: 1 1 auto;
+	flex: 1 1 auto;
 }
 
 .cnc-check__address {
-  font-size: 0.875rem;
-  color: var(--mat-sys-on-surface-variant, #49454f);
+	font-size: 0.875rem;
+	color: var(--mat-sys-on-surface-variant, #49454f);
 }
 
 .cnc-check__stock {
-  font-size: 0.8125rem;
-  margin-top: 4px;
+	font-size: 0.8125rem;
+	margin-top: 4px;
 }
 
 .cnc-stock--good {
-  color: var(--mat-sys-primary, green);
+	color: var(--mat-sys-primary, green);
 }
 
 .cnc-stock--low {
-  color: var(--mat-sys-tertiary, #e6a700);
+	color: var(--mat-sys-tertiary, #e6a700);
 }
 
 .cnc-stock--out {
-  color: var(--mat-sys-error, red);
+	color: var(--mat-sys-error, red);
 }

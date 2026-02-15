@@ -1,10 +1,10 @@
 .maps-container {
-  text-align: center;
+	text-align: center;
 }
 
 .cnc-btn {
-  margin-top: 12px;
-  background: var(--mat-sys-primary, #8B283D);
-  color: var(--mat-sys-on-primary, #fff);
-  border-radius: 20px;
+	margin-top: 12px;
+	background: var(--mat-sys-primary, #8b283d);
+	color: var(--mat-sys-on-primary, #fff);
+	border-radius: 20px;
 }

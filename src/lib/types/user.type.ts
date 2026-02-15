@@ -15,5 +15,5 @@ import { CncSelectedStore } from './store.type';
  * ```
  */
 export interface CncUser {
-  storeSelected: CncSelectedStore;
+	storeSelected: CncSelectedStore;
 }

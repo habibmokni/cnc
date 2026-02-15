@@ -1,47 +1,52 @@
 <div class="cnc-store-selector">
-  <div class="cnc-store-selector__header">
-    <h2 class="cnc-store-selector__title">Find stores nearby you</h2>
-    <p class="cnc-store-selector__subtitle">
-      Enter the location or zip code to check which nearest store has the selected product
-    </p>
-  </div>
+	<div class="cnc-store-selector__header">
+		<h2 class="cnc-store-selector__title">Find stores nearby you</h2>
+		<p class="cnc-store-selector__subtitle">
+			Enter the location or zip code to check which nearest store has the selected product
+		</p>
+	</div>
 
-  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
-    <!-- Address tab -->
-    <mat-tab label="Address">
-      <div class="cnc-store-selector__search">
-        <mat-form-field appearance="outline" class="cnc-store-selector__field">
-          <mat-label>Zip code or address</mat-label>
-          <input #searchInput matInput type="text" placeholder="Enter zip code or address" />
-        </mat-form-field>
-      </div>
+	<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+		<!-- Address tab -->
+		<mat-tab label="Address">
+			<div class="cnc-store-selector__search">
+				<mat-form-field appearance="outline" class="cnc-store-selector__field">
+					<mat-label>Zip code or address</mat-label>
+					<input
+						#searchInput
+						matInput
+						type="text"
+						placeholder="Enter zip code or address"
+					/>
+				</mat-form-field>
+			</div>
 
-      @for (ns of nearbyStores(); track ns.store.id) {
-        <div class="cnc-store-selector__result" (click)="onStoreSelect(ns.store)">
-          <button mat-button>
-            <h3>{{ ns.store.name }}</h3>
-          </button>
-          <p class="cnc-store-selector__address">{{ ns.store.address }}</p>
-          <p class="cnc-store-selector__distance">
-            <mat-icon fontSet="material-icons-outlined">room</mat-icon>
-            {{ ns.distance.toFixed(2) }} km
-          </p>
-          <mat-divider />
-        </div>
-      }
-    </mat-tab>
+			@for (nearbyStore of nearbyStores(); track nearbyStore.store.id) {
+				<div class="cnc-store-selector__result" (click)="onStoreSelect(nearbyStore.store)">
+					<button mat-button>
+						<h3>{{ nearbyStore.store.name }}</h3>
+					</button>
+					<p class="cnc-store-selector__address">{{ nearbyStore.store.address }}</p>
+					<p class="cnc-store-selector__distance">
+						<mat-icon fontSet="material-icons-outlined">room</mat-icon>
+						{{ nearbyStore.distance.toFixed(2) }} km
+					</p>
+					<mat-divider />
+				</div>
+			}
+		</mat-tab>
 
-    <!-- Map tab -->
-    <mat-tab label="Map">
-      <cnc-maps />
-    </mat-tab>
-  </mat-tab-group>
+		<!-- Map tab -->
+		<mat-tab label="Map">
+			<cnc-maps />
+		</mat-tab>
+	</mat-tab-group>
 
-  <!-- Selected store -->
-  @if (user(); as u) {
-    <div class="cnc-store-selector__selected">
-      <h3>{{ u.storeSelected.name }}</h3>
-      <p>{{ u.storeSelected.address }}</p>
-    </div>
-  }
+	<!-- Selected store -->
+	@if (user(); as currentUser) {
+		<div class="cnc-store-selector__selected">
+			<h3>{{ currentUser.storeSelected.name }}</h3>
+			<p>{{ currentUser.storeSelected.address }}</p>
+		</div>
+	}
 </div>

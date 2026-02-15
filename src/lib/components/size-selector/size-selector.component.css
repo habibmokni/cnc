@@ -1,63 +1,63 @@
 .cnc-size__item {
-  display: flex;
-  align-items: center;
-  height: 46px;
-  padding: 0 24px;
-  font-size: 1rem;
-  color: var(--mat-sys-primary, #8B283D);
-  cursor: pointer;
+	display: flex;
+	align-items: center;
+	height: 46px;
+	padding: 0 24px;
+	font-size: 1rem;
+	color: var(--mat-sys-primary, #8b283d);
+	cursor: pointer;
 }
 
 .cnc-size__item:hover {
-  background: var(--mat-sys-surface-container-low, #f7f2fa);
+	background: var(--mat-sys-surface-container-low, #f7f2fa);
 }
 
 .cnc-size__item--sold-out {
-  background: var(--mat-sys-surface-dim, rgba(0, 0, 0, 0.08));
-  color: var(--mat-sys-on-surface-variant, #b8b8b8);
+	background: var(--mat-sys-surface-dim, rgba(0, 0, 0, 0.08));
+	color: var(--mat-sys-on-surface-variant, #b8b8b8);
 }
 
 .cnc-size__filler {
-  flex: 1 1 auto;
+	flex: 1 1 auto;
 }
 
 .cnc-size__badge {
-  font-size: 0.8125rem;
+	font-size: 0.8125rem;
 }
 
 .cnc-size__icon {
-  padding-top: 2px;
-  color: var(--mat-sys-primary, #8B283D);
+	padding-top: 2px;
+	color: var(--mat-sys-primary, #8b283d);
 }
 
 .cnc-size__store-info {
-  margin: 16px 0;
-  text-align: center;
+	margin: 16px 0;
+	text-align: center;
 }
 
 .cnc-size__store-address {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  font-size: 0.875rem;
-  color: var(--mat-sys-on-surface-variant, #49454f);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	font-size: 0.875rem;
+	color: var(--mat-sys-on-surface-variant, #49454f);
 }
 
 .cnc-btn {
-  background: var(--mat-sys-primary, #8B283D);
-  color: var(--mat-sys-on-primary, #fff);
-  border-radius: 20px;
+	background: var(--mat-sys-primary, #8b283d);
+	color: var(--mat-sys-on-primary, #fff);
+	border-radius: 20px;
 }
 
 .cnc-stock--good {
-  color: var(--mat-sys-primary, green);
+	color: var(--mat-sys-primary, green);
 }
 
 .cnc-stock--low {
-  color: var(--mat-sys-tertiary, #e6a700);
+	color: var(--mat-sys-tertiary, #e6a700);
 }
 
 .cnc-stock--out {
-  color: var(--mat-sys-error, red);
+	color: var(--mat-sys-error, red);
 }

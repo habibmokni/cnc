@@ -1,57 +1,68 @@
-@if (product(); as p) {
-  @if (firstVariant(); as v) {
-    <mat-accordion>
-      <mat-expansion-panel #panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Select Size</mat-panel-title>
-          @if (isSizeSelected()) {
-            <mat-panel-description>Selected size: {{ size() }}</mat-panel-description>
-          }
-        </mat-expansion-panel-header>
+@if (product(); as currentProduct) {
+	@if (firstVariant(); as variant) {
+		<mat-accordion>
+			<mat-expansion-panel #panel>
+				<mat-expansion-panel-header>
+					<mat-panel-title>Select Size</mat-panel-title>
+					@if (isSizeSelected()) {
+						<mat-panel-description>Selected size: {{ size() }}</mat-panel-description>
+					}
+				</mat-expansion-panel-header>
 
-        @for (s of v.sizes; track s; let i = $index) {
-          <mat-divider />
-          <a
-            class="cnc-size__item"
-            [class.cnc-size__item--sold-out]="+v.instock[i] === 0"
-            (click)="onSizeSelect(s, i, v, p)">
-            {{ s }}
-            <span class="cnc-size__filler"></span>
-            @if (+v.instock[i] < 5 && +v.instock[i] > 0) {
-              <span class="cnc-size__badge cnc-stock--low">almost sold out</span>
-            }
-            @if (+v.instock[i] === 0) {
-              <span class="cnc-size__badge cnc-stock--out">Sold out | Check in stores</span>
-              <mat-icon class="cnc-size__icon" fontSet="material-icons-outlined">room</mat-icon>
-            }
-          </a>
-          <mat-divider />
-        }
-      </mat-expansion-panel>
-    </mat-accordion>
+				@for (sizeOption of variant.sizes; track sizeOption; let idx = $index) {
+					<mat-divider />
+					<a
+						class="cnc-size__item"
+						[class.cnc-size__item--sold-out]="+variant.inStock[idx] === 0"
+						(click)="onSizeSelect(sizeOption, idx, variant, currentProduct)"
+					>
+						{{ sizeOption }}
+						<span class="cnc-size__filler"></span>
+						@if (+variant.inStock[idx] < 5 && +variant.inStock[idx] > 0) {
+							<span class="cnc-size__badge cnc-stock--low">almost sold out</span>
+						}
+						@if (+variant.inStock[idx] === 0) {
+							<span class="cnc-size__badge cnc-stock--out">
+								Sold out | Check in stores
+							</span>
+							<mat-icon class="cnc-size__icon" fontSet="material-icons-outlined">
+								room
+							</mat-icon>
+						}
+					</a>
+					<mat-divider />
+				}
+			</mat-expansion-panel>
+		</mat-accordion>
 
-    <mat-divider />
+		<mat-divider />
 
-    @if (user(); as u) {
-      @if (isSizeSelected()) {
-        <div class="cnc-size__store-info">
-          <h3>Your selected store</h3>
-          <p class="cnc-size__store-address">
-            @if (stock() > 5) {
-              <mat-icon class="cnc-stock--good" style="font-size:14px">fiber_manual_record</mat-icon>
-            } @else if (stock() > 0) {
-              <mat-icon class="cnc-stock--low" style="font-size:14px">fiber_manual_record</mat-icon>
-            } @else {
-              <mat-icon class="cnc-stock--out" style="font-size:14px">fiber_manual_record</mat-icon>
-            }
-            {{ u.storeSelected.address }}
-          </p>
-          <button mat-flat-button class="cnc-btn" (click)="openDialog(p)">
-            Change Store
-          </button>
-        </div>
-        <mat-divider />
-      }
-    }
-  }
+		@if (user(); as currentUser) {
+			@if (isSizeSelected()) {
+				<div class="cnc-size__store-info">
+					<h3>Your selected store</h3>
+					<p class="cnc-size__store-address">
+						@if (stock() > 5) {
+							<mat-icon class="cnc-stock--good" style="font-size: 14px">
+								fiber_manual_record
+							</mat-icon>
+						} @else if (stock() > 0) {
+							<mat-icon class="cnc-stock--low" style="font-size: 14px">
+								fiber_manual_record
+							</mat-icon>
+						} @else {
+							<mat-icon class="cnc-stock--out" style="font-size: 14px">
+								fiber_manual_record
+							</mat-icon>
+						}
+						{{ currentUser.storeSelected.address }}
+					</p>
+					<button mat-flat-button class="cnc-btn" (click)="openDialog(currentProduct)">
+						Change Store
+					</button>
+				</div>
+				<mat-divider />
+			}
+		}
+	}
 }

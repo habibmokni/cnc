@@ -197,7 +197,7 @@ The library defines **only the fields it needs**. Consumers extend with richer t
 | `CncStore` | `id`, `name`, `address`, `location`, `products` | Store contract |
 | `CncSelectedStore` | `id`, `name`, `address`, `products?` | Lightweight store ref on user |
 | `CncStoreProduct` | `modelNo`, `variants` | In-store inventory item |
-| `CncVariant` | `variantId`, `sizes`, `instock` | Size/stock data per variant |
+| `CncVariant` | `variantId`, `sizes`, `inStock` | Size/stock data per variant |
 | `CncCartItem` | `modelNo`, `productName`, `productImage`, `price`, `size`, `noOfItems`, `variantId?` | Cart item for stock checks + display |
 | `CncUser` | `storeSelected` | User contract (only store selection needed) |
 | `CncNearbyStore<TStore>` | `store`, `distance`, `stock?` | Generic — preserves your store type |

@@ -1,43 +1,50 @@
 @if (!isStoreSelected()) {
-  <div class="maps-container">
-    <google-map
-      [options]="options()"
-      [height]="mapHeight()"
-      [width]="mapWidth()">
-      @if (currentLocation(); as loc) {
-        <map-marker [position]="loc" [options]="markerOptions" />
-      }
+	<div class="maps-container">
+		<google-map [options]="options()" [height]="mapHeight()" [width]="mapWidth()">
+			@if (currentLocation(); as location) {
+				<map-marker [position]="location" [options]="markerOptions" />
+			}
 
-      @for (store of storeList(); track store.id; let i = $index) {
-        <map-marker
-          #marker="mapMarker"
-          [position]="storeLocations()[i]"
-          [options]="markerOptions"
-          (mapClick)="openInfoWindow(marker, store, $event)" />
-      }
+			@for (store of storeList(); track store.id; let idx = $index) {
+				<map-marker
+					#marker="mapMarker"
+					[position]="storeLocations()[idx]"
+					[options]="markerOptions"
+					(mapClick)="openInfoWindow(marker, store, $event)"
+				/>
+			}
 
-      @if (currentStore(); as cs) {
-        <map-info-window #infoWindow="mapInfoWindow">
-          <h2>{{ cs.name }}</h2>
-          <p>{{ cs.address }}</p>
-          <button mat-flat-button type="button" (click)="onStoreSelect(cs)">Select</button>
-          <button mat-flat-button type="button" (click)="onGetDirections(cs.location)">Directions</button>
-        </map-info-window>
-      }
+			@if (currentStore(); as selectedStore) {
+				<map-info-window #infoWindow="mapInfoWindow">
+					<h2>{{ selectedStore.name }}</h2>
+					<p>{{ selectedStore.address }}</p>
+					<button mat-flat-button type="button" (click)="onStoreSelect(selectedStore)">
+						Select
+					</button>
+					<button
+						mat-flat-button
+						type="button"
+						(click)="onGetDirections(selectedStore.location)"
+					>
+						Directions
+					</button>
+				</map-info-window>
+			}
 
-      @if (directionsResult(); as dr) {
-        <map-directions-renderer [directions]="dr" />
-      }
-    </google-map>
+			@if (directionsResult(); as directions) {
+				<map-directions-renderer [directions]="directions" />
+			}
+		</google-map>
 
-    <button mat-flat-button class="cnc-btn" (click)="onGetCurrentLocation()">
-      <mat-icon>my_location</mat-icon> Stores Nearby
-    </button>
-  </div>
+		<button mat-flat-button class="cnc-btn" (click)="onGetCurrentLocation()">
+			<mat-icon>my_location</mat-icon>
+			Stores Nearby
+		</button>
+	</div>
 }
 
 @if (isStoreSelected()) {
-  <div class="maps-container">
-    <button mat-flat-button class="cnc-btn" (click)="reselectStore()">Change store</button>
-  </div>
+	<div class="maps-container">
+		<button mat-flat-button class="cnc-btn" (click)="reselectStore()">Change store</button>
+	</div>
 }

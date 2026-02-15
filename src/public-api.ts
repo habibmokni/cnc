@@ -15,4 +15,3 @@ export { SizeSelectorComponent } from './lib/components/size-selector/size-selec
 export { ProductAvailabilityComponent } from './lib/components/product-availability/product-availability.component';
 export { CheckAvailabilityComponent } from './lib/components/check-availability/check-availability.component';
 export { MapsComponent } from './lib/components/maps/maps.component';
-

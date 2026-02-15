@@ -13,11 +13,11 @@
  * ```
  */
 export interface CncCartItem {
-  modelNo: string;
-  productName: string;
-  productImage: string;
-  price: number;
-  size: number;
-  noOfItems: number;
-  variantId?: string;
+	modelNo: string;
+	productName: string;
+	productImage: string;
+	price: number;
+	size: number;
+	noOfItems: number;
+	variantId?: string;
 }

@@ -3,9 +3,9 @@
  * Consumers may extend with extra fields (e.g. color, sku).
  */
 export interface CncVariant {
-  variantId: string;
-  sizes: number[];
-  instock: number[];
+	variantId: string;
+	sizes: number[];
+	inStock: number[];
 }
 
 /**
@@ -13,8 +13,8 @@ export interface CncVariant {
  * Consumers may extend with extra fields (e.g. brand, images).
  */
 export interface CncStoreProduct {
-  modelNo: string;
-  variants: CncVariant[];
+	modelNo: string;
+	variants: CncVariant[];
 }
 
 /**
@@ -22,10 +22,10 @@ export interface CncStoreProduct {
  * Products are optional — may not be populated yet.
  */
 export interface CncSelectedStore {
-  id: string;
-  name: string;
-  address: string;
-  products?: CncStoreProduct[];
+	id: string;
+	name: string;
+	address: string;
+	products?: CncStoreProduct[];
 }
 
 /**
@@ -33,8 +33,8 @@ export interface CncSelectedStore {
  * (e.g. openingTime, description, reviews).
  */
 export interface CncStore extends CncSelectedStore {
-  location: { lat: number; lng: number };
-  products: CncStoreProduct[];
+	location: { lat: number; lng: number };
+	products: CncStoreProduct[];
 }
 
 /**
@@ -42,7 +42,7 @@ export interface CncStore extends CncSelectedStore {
  * Generic so the consumer's richer store type is preserved.
  */
 export interface CncNearbyStore<TStore extends CncStore = CncStore> {
-  store: TStore;
-  distance: number;
-  stock?: number;
+	store: TStore;
+	distance: number;
+	stock?: number;
 }

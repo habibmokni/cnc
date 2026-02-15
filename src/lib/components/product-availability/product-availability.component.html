@@ -1,44 +1,50 @@
 <div mat-dialog-content class="cnc-availability">
-  <h2 class="cnc-availability__title">Check Availability</h2>
-  <p class="cnc-availability__subtitle">
-    Enter the location or zip code to check which nearest store has the selected product
-  </p>
+	<h2 class="cnc-availability__title">Check Availability</h2>
+	<p class="cnc-availability__subtitle">
+		Enter the location or zip code to check which nearest store has the selected product
+	</p>
 
-  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
-    <mat-tab label="Address">
-      <div class="cnc-availability__search">
-        <mat-form-field appearance="outline" class="cnc-availability__field">
-          <mat-label>Zip code or address</mat-label>
-          <input #searchInput matInput type="text" placeholder="Enter zip code or address" />
-        </mat-form-field>
-      </div>
+	<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+		<mat-tab label="Address">
+			<div class="cnc-availability__search">
+				<mat-form-field appearance="outline" class="cnc-availability__field">
+					<mat-label>Zip code or address</mat-label>
+					<input
+						#searchInput
+						matInput
+						type="text"
+						placeholder="Enter zip code or address"
+					/>
+				</mat-form-field>
+			</div>
 
-      @for (ns of nearbyStores(); track ns.store.id) {
-        <mat-divider />
-        <div class="cnc-availability__result" (click)="onStoreSelect(ns.store)">
-          <h3>{{ ns.store.name }}</h3>
-          <p class="cnc-availability__address">{{ ns.store.address }}</p>
-          <p class="cnc-availability__stock">
-            @if ((ns.stock ?? 0) > 5) {
-              <mat-icon class="cnc-stock--good">room</mat-icon>
-            } @else if ((ns.stock ?? 0) > 0) {
-              <mat-icon class="cnc-stock--low">room</mat-icon>
-            } @else {
-              <mat-icon class="cnc-stock--out">room</mat-icon>
-            }
-            {{ ns.distance.toFixed(2) }} km
-          </p>
-        </div>
-        <mat-divider />
-      }
-    </mat-tab>
+			@for (nearbyStore of nearbyStores(); track nearbyStore.store.id) {
+				<mat-divider />
+				<div class="cnc-availability__result" (click)="onStoreSelect(nearbyStore.store)">
+					<h3>{{ nearbyStore.store.name }}</h3>
+					<p class="cnc-availability__address">{{ nearbyStore.store.address }}</p>
+					<p class="cnc-availability__stock">
+						@if ((nearbyStore.stock ?? 0) > 5) {
+							<mat-icon class="cnc-stock--good">room</mat-icon>
+						} @else if ((nearbyStore.stock ?? 0) > 0) {
+							<mat-icon class="cnc-stock--low">room</mat-icon>
+						} @else {
+							<mat-icon class="cnc-stock--out">room</mat-icon>
+						}
+						{{ nearbyStore.distance.toFixed(2) }} km
+					</p>
+				</div>
+				<mat-divider />
+			}
+		</mat-tab>
 
-    <mat-tab label="Map">
-      <cnc-maps
-        [cartProducts]="cartProducts()"
-        [size]="data.size ?? 0"
-        [modelNo]="data.modelNo ?? ''"
-        [variantId]="data.variantId ?? ''" />
-    </mat-tab>
-  </mat-tab-group>
+		<mat-tab label="Map">
+			<cnc-maps
+				[cartProducts]="cartProducts()"
+				[size]="data.size ?? 0"
+				[modelNo]="data.modelNo ?? ''"
+				[variantId]="data.variantId ?? ''"
+			/>
+		</mat-tab>
+	</mat-tab-group>
 </div>
