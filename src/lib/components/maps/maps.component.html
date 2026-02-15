@@ -25,8 +25,8 @@
 
       <map-marker [position]="currentUserLocation()" />
 
-      @if (directionsResults$ | async; as directionsResults) {
-        <map-directions-renderer [directions]="directionsResults" />
+      @if (directionsResult(); as dr) {
+        <map-directions-renderer [directions]="dr" />
       }
     </google-map>
 

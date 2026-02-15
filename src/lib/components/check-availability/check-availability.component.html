@@ -28,7 +28,7 @@
         <div class="cnc-check__search-row">
           <mat-form-field appearance="outline" class="cnc-check__field">
             <mat-label>Zip code or address</mat-label>
-            <input id="cnc-search-check" matInput type="text" placeholder="Enter zip code or address" />
+            <input #searchInput matInput type="text" placeholder="Enter zip code or address" />
           </mat-form-field>
           <button mat-icon-button type="button" (click)="currentLocation()">
             <mat-icon fontSet="material-icons-outlined">room</mat-icon>

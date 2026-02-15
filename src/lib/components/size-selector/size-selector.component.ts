@@ -1,14 +1,13 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  computed,
   inject,
   input,
   output,
   signal,
   viewChild,
-  OnInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,13 +16,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { ProductAvailabilityComponent } from '../product-availability/product-availability.component';
-import { CncUser } from '../../types/user.type';
 
 @Component({
   selector: 'cnc-size-selector',
   standalone: true,
   imports: [
-    CommonModule,
     MatExpansionModule,
     MatCardModule,
     MatButtonModule,
@@ -34,7 +31,7 @@ import { CncUser } from '../../types/user.type';
   styleUrl: './size-selector.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SizeSelectorComponent implements OnInit {
+export class SizeSelectorComponent {
   private readonly cncService = inject(ClickNCollectService);
   private readonly dialog = inject(MatDialog);
 
@@ -45,30 +42,29 @@ export class SizeSelectorComponent implements OnInit {
   readonly sizeSelected = output<number>();
 
   // ── Local state ────────────────────────────────────────────────
-  readonly user = signal<CncUser | null>(null);
   readonly size = signal(0);
-  readonly stock = signal(0);
   readonly isSizeSelected = signal(false);
 
-  ngOnInit(): void {
-    this.user.set(this.cncService.user());
+  // ── Derived ────────────────────────────────────────────────────
+  readonly user = computed(() => this.cncService.user());
 
-    this.cncService.storeSelected.subscribe((store) => {
-      const u = this.user();
-      if (u) {
-        this.cncService.setUser({ ...u, storeSelected: store });
-        this.user.set(this.cncService.user());
-      } else {
-        this.cncService.setUser({ name: 'Anonymous', storeSelected: store } as any);
-        this.user.set(this.cncService.user());
-      }
-      this.checkStockForCurrentSize();
-    });
-  }
+  /** Reactive stock count — recalculates when user or size changes. */
+  readonly stock = computed(() => {
+    const u = this.user();
+    const p = this.product();
+    const s = this.size();
+    if (!u?.storeSelected?.products || !p || s === 0) return 0;
+    return this.cncService.findStockForSize(
+      u.storeSelected.products,
+      p.modelNo,
+      p.variants[0].variantId,
+      s,
+    );
+  });
 
+  // ── Actions ────────────────────────────────────────────────────
   onSizeSelect(selectedSize: number, index: number, product: any): void {
     this.size.set(selectedSize);
-    this.checkStockForCurrentSize();
     this.sizeSelected.emit(selectedSize);
     this.isSizeSelected.set(true);
 
@@ -92,24 +88,5 @@ export class SizeSelectorComponent implements OnInit {
       maxWidth: '100vw',
       maxHeight: '100vh',
     });
-  }
-
-  private checkStockForCurrentSize(): void {
-    const u = this.user();
-    const p = this.product();
-    if (!u || !p) return;
-
-    for (const storeProduct of u.storeSelected.products ?? []) {
-      if (storeProduct.modelNo !== p.modelNo) continue;
-      for (const variant of storeProduct.variants) {
-        if (variant.variantId !== p.variants[0].variantId) continue;
-        for (let i = 0; i < variant.sizes.length; i++) {
-          if (variant.sizes[i] === this.size()) {
-            this.stock.set(+variant.instock[i]);
-            return;
-          }
-        }
-      }
-    }
   }
 }

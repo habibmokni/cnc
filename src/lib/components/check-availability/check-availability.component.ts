@@ -1,12 +1,14 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  ElementRef,
+  computed,
+  effect,
   inject,
   signal,
-  OnInit,
+  viewChild,
   NgZone,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -17,13 +19,12 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
-import { Store, NearbyStore } from '../../types/store.type';
+import { NearbyStore } from '../../types/store.type';
 
 @Component({
   selector: 'cnc-check-availability',
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatCardModule,
     MatTabsModule,
@@ -38,28 +39,37 @@ import { Store, NearbyStore } from '../../types/store.type';
   styleUrl: './check-availability.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CheckAvailabilityComponent implements OnInit {
+export class CheckAvailabilityComponent {
   private readonly ngZone = inject(NgZone);
   private readonly cncService = inject(ClickNCollectService);
   readonly data: any = inject(MAT_DIALOG_DATA);
 
-  readonly stores = signal<Store[]>(this.cncService.stores());
+  // ── viewChild for autocomplete (replaces document.getElementById) ─
+  readonly searchInput =
+    viewChild<ElementRef<HTMLInputElement>>('searchInput');
+
+  // ── Derived from service ───────────────────────────────────────
+  readonly stores = computed(() => this.cncService.stores());
+
+  // ── Local state ────────────────────────────────────────────────
   readonly nearbyStores = signal<NearbyStore[]>([]);
   readonly size = signal(0);
   readonly isSizeSelected = signal(false);
 
-  ngOnInit(): void {
+  constructor() {
+    // Initialise from dialog data
     if (this.data.size) {
       this.size.set(this.data.size);
       this.isSizeSelected.set(true);
     }
 
-    setTimeout(() => {
-      const input = document.getElementById('cnc-search-check') as HTMLInputElement;
-      if (!input) return;
+    // Set up Google Places Autocomplete when the input element appears
+    effect((onCleanup) => {
+      const el = this.searchInput()?.nativeElement;
+      if (!el) return;
 
-      const autocomplete = new google.maps.places.Autocomplete(input);
-      autocomplete.addListener('place_changed', () => {
+      const autocomplete = new google.maps.places.Autocomplete(el);
+      const listener = autocomplete.addListener('place_changed', () => {
         this.ngZone.run(() => {
           this.nearbyStores.set([]);
           const place = autocomplete.getPlace();
@@ -68,14 +78,21 @@ export class CheckAvailabilityComponent implements OnInit {
           const lat = place.geometry.location.lat();
           const lng = place.geometry.location.lng();
           this.cncService.findClosestMarker(lat, lng);
-          setTimeout(() => {
-            this.checkProductAvailability(this.data.modelNo, this.size(), this.data.variantId);
-          }, 100);
+          this.nearbyStores.set(
+            this.cncService.checkProductAvailability(
+              this.data.modelNo,
+              this.size(),
+              this.data.variantId,
+            ),
+          );
         });
       });
-    }, 500);
+
+      onCleanup(() => google.maps.event.removeListener(listener));
+    });
   }
 
+  // ── Actions ────────────────────────────────────────────────────
   changeSize(newSize: number): void {
     this.nearbyStores.set([]);
     this.size.set(newSize);
@@ -84,35 +101,21 @@ export class CheckAvailabilityComponent implements OnInit {
 
   currentLocation(): void {
     this.cncService.getCurrentLocation();
-    setTimeout(() => {
-      this.nearbyStores.set([]);
-      this.checkProductAvailability(this.data.modelNo, this.size(), this.data.variantId);
-    }, 1000);
-  }
-
-  private checkProductAvailability(modelNo: string, productSize: number, variantId: string): void {
-    const results: NearbyStore[] = [];
-    const distances = this.cncService.distanceInKm();
-
-    this.stores().forEach((store, i) => {
-      for (const product of store.products) {
-        if (product.modelNo !== modelNo) continue;
-        for (const variant of product.variants) {
-          if (variant.variantId !== variantId) continue;
-          for (let j = 0; j < variant.sizes.length; j++) {
-            if (+variant.sizes[j] === +productSize) {
-              results.push({
-                store,
-                stock: +variant.instock[j],
-                distance: distances[i] ?? Infinity,
-              });
-            }
-          }
-        }
+    // After geolocation resolves, compute availability
+    const check = setInterval(() => {
+      const loc = this.cncService.currentLocation();
+      if (loc.lat !== 51.44157584725519 || loc.lng !== 7.565725496333208) {
+        this.nearbyStores.set([]);
+        this.nearbyStores.set(
+          this.cncService.checkProductAvailability(
+            this.data.modelNo,
+            this.size(),
+            this.data.variantId,
+          ),
+        );
+        clearInterval(check);
       }
-    });
-
-    results.sort((a, b) => a.distance - b.distance);
-    this.nearbyStores.set(results);
+    }, 200);
+    setTimeout(() => clearInterval(check), 5000);
   }
 }

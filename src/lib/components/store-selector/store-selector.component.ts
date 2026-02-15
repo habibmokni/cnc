@@ -1,12 +1,14 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  ElementRef,
+  computed,
+  effect,
   inject,
   signal,
-  OnInit,
+  viewChild,
   NgZone,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,13 +19,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
 import { Store, NearbyStore } from '../../types/store.type';
-import { CncUser } from '../../types/user.type';
 
 @Component({
   selector: 'cnc-store-selector',
   standalone: true,
   imports: [
-    CommonModule,
     MatCardModule,
     MatTabsModule,
     MatButtonModule,
@@ -37,36 +37,30 @@ import { CncUser } from '../../types/user.type';
   styleUrl: './store-selector.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StoreSelectorComponent implements OnInit {
+export class StoreSelectorComponent {
   private readonly cncService = inject(ClickNCollectService);
   private readonly ngZone = inject(NgZone);
 
-  readonly user = signal<CncUser | null>(null);
-  readonly stores = signal<Store[]>([]);
+  // ── viewChild for autocomplete (replaces document.getElementById) ─
+  readonly searchInput =
+    viewChild<ElementRef<HTMLInputElement>>('searchInput');
+
+  // ── Derived from service ───────────────────────────────────────
+  readonly user = computed(() => this.cncService.user());
+  readonly stores = computed(() => this.cncService.stores());
+
+  // ── Local state ────────────────────────────────────────────────
   readonly nearbyStores = signal<NearbyStore[]>([]);
   readonly isStores = signal(false);
 
-  ngOnInit(): void {
-    this.user.set(this.cncService.user());
-    this.stores.set(this.cncService.stores());
+  constructor() {
+    // Set up Google Places Autocomplete when the input element appears
+    effect((onCleanup) => {
+      const el = this.searchInput()?.nativeElement;
+      if (!el) return;
 
-    this.cncService.storeSelected.subscribe((store) => {
-      const u = this.user();
-      if (u) {
-        this.cncService.setUser({ ...u, storeSelected: store });
-        this.user.set(this.cncService.user());
-      } else {
-        this.cncService.setUser({ name: 'Anonymous', storeSelected: store } as any);
-        this.user.set(this.cncService.user());
-      }
-    });
-
-    setTimeout(() => {
-      const input = document.getElementById('cnc-search-address') as HTMLInputElement;
-      if (!input) return;
-
-      const autocomplete = new google.maps.places.Autocomplete(input);
-      autocomplete.addListener('place_changed', () => {
+      const autocomplete = new google.maps.places.Autocomplete(el);
+      const listener = autocomplete.addListener('place_changed', () => {
         this.ngZone.run(() => {
           this.nearbyStores.set([]);
           const place = autocomplete.getPlace();
@@ -75,25 +69,18 @@ export class StoreSelectorComponent implements OnInit {
           const lat = place.geometry.location.lat();
           const lng = place.geometry.location.lng();
           this.cncService.findClosestMarker(lat, lng);
-          this.computeNearbyStores();
+          this.nearbyStores.set(this.cncService.nearbyStores());
+          this.isStores.set(true);
         });
       });
-    }, 1000);
+
+      onCleanup(() => google.maps.event.removeListener(listener));
+    });
   }
 
-  private computeNearbyStores(): void {
-    const distances = this.cncService.distanceInKm();
-    const result: NearbyStore[] = this.stores().map((store, i) => ({
-      store,
-      distance: distances[i] ?? Infinity,
-    }));
-    result.sort((a, b) => a.distance - b.distance);
-    this.nearbyStores.set(result);
-    this.isStores.set(true);
-  }
-
+  // ── Actions ────────────────────────────────────────────────────
   onStoreSelect(store: Store): void {
-    this.cncService.storeSelected.next(store);
+    this.cncService.selectStore(store);
     this.nearbyStores.set([]);
   }
 }
