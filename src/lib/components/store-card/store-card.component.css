@@ -1,0 +1,113 @@
+/* ── Store Card ──────────────────────────────────────────── */
+
+.store-card {
+	display: flex;
+	flex-direction: column;
+	padding: 12px 16px;
+	border-radius: 12px;
+	border: 1px solid var(--mat-sys-outline-variant, #cac4d0);
+	background: var(--mat-sys-surface, #fffbfe);
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease;
+}
+
+.store-card:hover {
+	background: var(--mat-sys-surface-container-low, #f7f2fa);
+}
+
+.store-card.selected {
+	border-color: var(--mat-sys-primary, #6750a4);
+	background: var(--mat-sys-surface-container, #f3edf7);
+}
+
+.store-card-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.store-icon-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: var(--mat-sys-surface-container-high, #ece6f0);
+	flex-shrink: 0;
+}
+
+.store-icon {
+	font-size: 20px;
+	width: 20px;
+	height: 20px;
+	color: var(--mat-sys-on-surface-variant, #49454f);
+}
+
+.store-header-info {
+	flex: 1;
+	min-width: 0;
+}
+
+.store-name {
+	margin: 0;
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: var(--mat-sys-on-surface, #1c1b1f);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.store-address {
+	display: block;
+	font-size: 0.8125rem;
+	color: var(--mat-sys-on-surface-variant, #49454f);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Stock badge */
+.stock-badge {
+	font-size: 0.75rem;
+	font-weight: 600;
+	padding: 2px 8px;
+	border-radius: 12px;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.stock-badge.good {
+	background: #e8f5e9;
+	color: #1b5e20;
+}
+
+.stock-badge.low {
+	background: #fff8e1;
+	color: #e65100;
+}
+
+.stock-badge.out {
+	background: #fce4ec;
+	color: #b71c1c;
+}
+
+/* Distance */
+.store-distance {
+	font-size: 0.75rem;
+	color: var(--mat-sys-on-surface-variant, #49454f);
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+/* Selected check */
+.check-icon {
+	color: var(--mat-sys-primary, #6750a4);
+	font-size: 22px;
+	width: 22px;
+	height: 22px;
+	flex-shrink: 0;
+}

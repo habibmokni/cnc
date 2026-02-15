@@ -8,8 +8,8 @@ import {
 	viewChild,
 	NgZone,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatCardModule } from '@angular/material/card';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,7 +18,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
-import { CncNearbyStore } from '../../types/store.type';
+import { StoreCardComponent } from '../store-card/store-card.component';
+import { CncStore, CncNearbyStore } from '../../types/store.type';
 import { CheckAvailabilityDialogData } from '../../types/dialog.type';
 
 @Component({
@@ -26,7 +27,7 @@ import { CheckAvailabilityDialogData } from '../../types/dialog.type';
 	standalone: true,
 	imports: [
 		MatDialogModule,
-		MatCardModule,
+		MatExpansionModule,
 		MatTabsModule,
 		MatButtonModule,
 		MatIconModule,
@@ -34,6 +35,7 @@ import { CheckAvailabilityDialogData } from '../../types/dialog.type';
 		MatDividerModule,
 		MatFormFieldModule,
 		MapsComponent,
+		StoreCardComponent,
 	],
 	templateUrl: './check-availability.component.html',
 	styleUrl: './check-availability.component.css',
@@ -42,6 +44,7 @@ import { CheckAvailabilityDialogData } from '../../types/dialog.type';
 export class CheckAvailabilityComponent {
 	private readonly ngZone = inject(NgZone);
 	private readonly cncService = inject(ClickNCollectService);
+	private readonly dialogRef = inject(MatDialogRef<CheckAvailabilityComponent>);
 	protected readonly data: CheckAvailabilityDialogData = inject(MAT_DIALOG_DATA);
 
 	private readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
@@ -50,6 +53,8 @@ export class CheckAvailabilityComponent {
 	protected readonly nearbyStores = signal<CncNearbyStore[]>([]);
 	protected readonly size = signal(0);
 	protected readonly isSizeSelected = signal(false);
+	protected readonly step = signal(0);
+	protected readonly pendingStore = signal<CncStore | null>(null);
 
 	private readonly geoRequested = signal(false);
 
@@ -57,6 +62,7 @@ export class CheckAvailabilityComponent {
 		if (this.data.size) {
 			this.size.set(this.data.size);
 			this.isSizeSelected.set(true);
+			this.step.set(1);
 		}
 
 		effect((onCleanup) => {
@@ -86,11 +92,10 @@ export class CheckAvailabilityComponent {
 			onCleanup(() => google.maps.event.removeListener(listener));
 		});
 
-		// React to geolocation resolving after user clicks "use my location"
+		// React to geolocation resolving after user clicks "use my location".
 		effect(() => {
 			const loc = this.cncService.currentLocation();
 			if (!loc || !this.geoRequested()) return;
-			this.nearbyStores.set([]);
 			this.cncService.findClosestMarker(loc.lat, loc.lng);
 			this.nearbyStores.set(
 				this.cncService.checkProductAvailability(
@@ -103,14 +108,30 @@ export class CheckAvailabilityComponent {
 		});
 	}
 
+	protected close(): void {
+		this.dialogRef.close();
+	}
+
 	protected changeSize(newSize: number): void {
 		this.nearbyStores.set([]);
 		this.size.set(newSize);
 		this.isSizeSelected.set(true);
+		this.step.set(1);
 	}
 
-	protected currentLocation(): void {
+	protected useCurrentLocation(): void {
 		this.geoRequested.set(true);
 		this.cncService.getCurrentLocation();
+	}
+
+	protected onStoreSelect(store: CncStore): void {
+		this.pendingStore.set(store);
+	}
+
+	protected confirmStoreSelection(): void {
+		const store = this.pendingStore();
+		if (!store) return;
+		this.cncService.selectStore(store);
+		this.dialogRef.close(store);
 	}
 }

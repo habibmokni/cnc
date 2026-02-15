@@ -1,5 +1,5 @@
 /*
- * Public API Surface of @habibmokni/cnc v2
+ * Public API Surface of @habibmokni/cnc v2.1
  */
 
 // Types
@@ -10,6 +10,7 @@ export { ClickNCollectService } from './lib/services/click-n-collect.service';
 
 // Standalone components
 export { ClickNCollectComponent } from './lib/components/click-n-collect/click-n-collect.component';
+export { StoreCardComponent } from './lib/components/store-card/store-card.component';
 export { StoreSelectorComponent } from './lib/components/store-selector/store-selector.component';
 export { SizeSelectorComponent } from './lib/components/size-selector/size-selector.component';
 export { ProductAvailabilityComponent } from './lib/components/product-availability/product-availability.component';

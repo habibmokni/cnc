@@ -1,144 +1,151 @@
-<!-- Main checkout view: user exists and cart has items -->
-@if (user(); as currentUser) {
-	@if (cartProducts().length > 0) {
-		<div class="cnc-checkout">
-			<!-- Selected store header -->
-			<div class="cnc-checkout__store" (click)="onOpenDialog()">
-				<mat-icon class="cnc-checkout__store-icon" fontSet="material-icons-outlined">
-					room
-				</mat-icon>
-				<div class="cnc-checkout__store-info">
-					<h2>{{ currentUser.storeSelected.name }}</h2>
-					<p class="cnc-checkout__store-address">
-						{{ currentUser.storeSelected.address }}
-					</p>
-					@if (allItemsAvailable()) {
-						<p class="cnc-checkout__hint cnc-stock--good">
-							<mat-icon style="font-size: 14px">fiber_manual_record</mat-icon>
-							All products can be picked up
-						</p>
-					} @else {
-						<p class="cnc-checkout__hint cnc-stock--out">
-							<mat-icon style="font-size: 14px">fiber_manual_record</mat-icon>
-							Not all products can be picked up
-						</p>
+@if (cartProducts().length > 0) {
+	<div class="cnc-checkout">
+		<!-- ── Store Selection ───────────────────────────────────── -->
+		@if (selectedStore(); as myStore) {
+			<span class="store-section-label">Your Store</span>
+			<cnc-store-card
+				[store]="myStore"
+				[selected]="true"
+				[distance]="distanceMap()[myStore.id] ?? null"
+				[stock]="stockMap()[myStore.id] ?? null"
+				(storeSelect)="onStoreSelect($event)"
+			/>
+
+			<button
+				class="change-store-toggle"
+				(click)="otherStoresExpanded.set(!otherStoresExpanded())"
+			>
+				<span>{{ otherStoresExpanded() ? 'Hide other stores' : 'Change store' }}</span>
+				<mat-icon>{{ otherStoresExpanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+			</button>
+
+			@if (otherStoresExpanded()) {
+				<div class="other-stores-list">
+					@for (store of otherStores(); track store.id) {
+						<cnc-store-card
+							[store]="store"
+							[selected]="false"
+							[distance]="distanceMap()[store.id] ?? null"
+							[stock]="stockMap()[store.id] ?? null"
+							(storeSelect)="onStoreSelect($event)"
+						/>
 					}
 				</div>
-				<mat-icon>chevron_right</mat-icon>
-			</div>
+			}
+		} @else {
+			<!-- No store selected yet — show all stores -->
+			<span class="store-section-label">Select a store</span>
+			@for (store of stores(); track store.id) {
+				<cnc-store-card
+					[store]="store"
+					[distance]="distanceMap()[store.id] ?? null"
+					[stock]="stockMap()[store.id] ?? null"
+					(storeSelect)="onStoreSelect($event)"
+				/>
+			} @empty {
+				<p class="no-stores-msg">No stores available in your area.</p>
+			}
+		}
 
-			<!-- Unavailable items -->
-			@if (!allItemsAvailable()) {
-				<div class="cnc-checkout__unavailable">
-					@for (product of cartItemUnavailable(); track product.modelNo) {
-						<div class="cnc-checkout__unavailable-item">
-							<div class="cnc-checkout__item-img">
-								<img [src]="product.productImage" [alt]="product.productName" />
-							</div>
-							<div class="cnc-checkout__item-details">
-								<h3>{{ product.productName }}</h3>
-								<p>Size: {{ product.size }}</p>
-								<p class="cnc-stock--out">out of stock</p>
-							</div>
-							<div class="cnc-checkout__item-price">
-								<strong>{{ product.price }}&euro;</strong>
+		<!-- ── Unavailable Items Warning ─────────────────────────── -->
+		@if (selectedStore() && !allAvailable()) {
+			<div class="unavailable-banner">
+				<div class="unavailable-header-row">
+					<mat-icon class="warning-icon">warning</mat-icon>
+					<div class="unavailable-text">
+						<strong>
+							{{ unavailableProducts().length }}
+							{{ unavailableProducts().length === 1 ? 'item' : 'items' }}
+							unavailable at this store
+						</strong>
+						<span>
+							Remove
+							{{ unavailableProducts().length === 1 ? 'it' : 'them' }}
+							or try a different store.
+						</span>
+					</div>
+				</div>
+
+				<div class="unavailable-items-list">
+					@for (product of unavailableProducts(); track product.modelNo) {
+						<div class="unavailable-item-row">
+							<img
+								[src]="product.productImage"
+								[alt]="product.productName"
+								class="unavailable-item-img"
+							/>
+							<div class="unavailable-item-info">
+								<span class="unavailable-item-name">{{ product.productName }}</span>
+								<span class="unavailable-item-meta">Size {{ product.size }}</span>
 							</div>
 						</div>
 					}
-					<div class="cnc-checkout__remove-row">
-						<button
-							mat-flat-button
-							class="cnc-btn"
-							(click)="removeProductsUnavailable()"
-						>
-							Remove unavailable items
-						</button>
-					</div>
-				</div>
-			}
-
-			<!-- No store selected prompt -->
-			@if (!isStoreSelected()) {
-				<div class="cnc-checkout__no-store">
-					<h2>Please select a collection point</h2>
-					<button mat-flat-button class="cnc-btn" (click)="onOpenDialog()">
-						Find Store
-					</button>
-				</div>
-			}
-
-			<mat-divider />
-
-			<!-- Calendar / time slot -->
-			<div class="cnc-checkout__slots">
-				<h2 class="cnc-checkout__slots-title">Book a slot</h2>
-
-				<div class="cnc-checkout__calendar">
-					@for (day of calendar; track day.getTime(); let idx = $index) {
-						<button
-							mat-raised-button
-							class="cnc-checkout__day-btn"
-							[class.cnc-checkout__day-btn--active]="selectedDayIndex() === idx"
-							[disabled]="day.getDay() === 0 || day.getDay() === 6"
-							(click)="onDaySelect(idx, day)"
-						>
-							<span class="cnc-checkout__day-label">{{ days[day.getDay()] }}</span>
-							<span class="cnc-checkout__day-date">{{ day.getDate() }}</span>
-						</button>
-					}
 				</div>
 
-				<mat-divider />
-
-				<mat-accordion>
-					<mat-expansion-panel #timePanel>
-						<mat-expansion-panel-header>
-							<mat-panel-title>Select collection time</mat-panel-title>
-							<mat-panel-description>Optional</mat-panel-description>
-						</mat-expansion-panel-header>
-
-						@if (times().length === 0) {
-							<p>Please select a day to get store timing</p>
-						}
-
-						@if (times().length > 0) {
-							<mat-radio-group class="cnc-checkout__time-list">
-								@for (timeSlot of times(); track timeSlot) {
-									<mat-radio-button
-										[value]="timeSlot"
-										(click)="onTimeSelected(timeSlot)"
-									>
-										<div class="cnc-checkout__time-row">
-											<span>{{ timeSlot }}:00 - {{ timeSlot + 1 }}:00</span>
-											<span class="cnc-checkout__filler"></span>
-											<span class="cnc-checkout__time-free">Free</span>
-										</div>
-									</mat-radio-button>
-									<mat-divider />
-								}
-							</mat-radio-group>
-						}
-					</mat-expansion-panel>
-				</mat-accordion>
+				<button mat-flat-button class="cnc-btn" (click)="removeUnavailable()">
+					Remove unavailable
+				</button>
 			</div>
-		</div>
-	}
+		}
 
+		<mat-divider />
+
+		<!-- ── Date & Time Picker ────────────────────────────────── -->
+		@if (selectedStore()) {
+			<div class="datetime-section">
+				<h2 class="section-title">Book a slot</h2>
+				<div class="datetime-row">
+					<mat-form-field appearance="outline">
+						<mat-label>Pickup date</mat-label>
+						<input
+							matInput
+							[matDatepicker]="picker"
+							[matDatepickerFilter]="weekdayFilter"
+							[min]="minDate"
+							[max]="maxDate"
+							(dateChange)="onDateChange($event.value)"
+							readonly
+						/>
+						<mat-datepicker-toggle matIconSuffix [for]="picker" />
+						<mat-datepicker #picker />
+					</mat-form-field>
+
+					<mat-form-field appearance="outline">
+						<mat-label>Pickup time</mat-label>
+						<input
+							matInput
+							[matTimepicker]="timePicker"
+							[matTimepickerMin]="minTime()"
+							[matTimepickerMax]="maxTime()"
+							(valueChange)="onTimeChange($event)"
+							readonly
+						/>
+						<mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+						<mat-timepicker #timePicker [interval]="'30m'" />
+					</mat-form-field>
+				</div>
+			</div>
+		}
+
+		<!-- ── Summary Confirmation ──────────────────────────────── -->
+		@if (isComplete()) {
+			<div class="cnc-summary">
+				<mat-icon class="summary-check-icon">check_circle</mat-icon>
+				<div class="summary-text">
+					<strong>{{ selectedStore()?.name }}</strong>
+					<span>
+						{{ selectedDate() | date: 'mediumDate' }} at
+						{{ selectedTime() }}
+					</span>
+				</div>
+			</div>
+		}
+	</div>
+} @else {
 	<!-- Cart is empty -->
-	@if (cartProducts().length === 0) {
-		<div class="cnc-checkout__empty">
-			<h2>No products in cart!</h2>
-			<p>Please add products to use click and collect.</p>
-			<button mat-flat-button class="cnc-btn" routerLink="/home">Go to store</button>
-		</div>
-	}
-}
-
-<!-- No user -->
-@if (!user()) {
-	<div class="cnc-checkout__empty">
-		<h2>No store selected</h2>
-		<p>Please select a store to use click and collect, else use delivery.</p>
-		<button mat-flat-button class="cnc-btn" (click)="selectStore()">Select Store</button>
+	<div class="cnc-empty">
+		<mat-icon class="empty-icon">shopping_cart</mat-icon>
+		<h2>No products in cart</h2>
+		<p>Please add products to use Click &amp; Collect.</p>
 	</div>
 }

@@ -1,82 +1,100 @@
-@if (!isSizeSelected()) {
-	<div class="cnc-check__size-picker">
-		<h2 class="cnc-check__title">Select Size</h2>
-		@if (size() > 0) {
-			<p class="cnc-check__subtitle">Your current size selection is: {{ size() }}</p>
-		}
-		@for (sizeOption of data.sizes; track sizeOption) {
-			<mat-divider />
-			<a class="cnc-check__size-item" (click)="changeSize(sizeOption)">{{ sizeOption }}</a>
-			<mat-divider />
-		}
-	</div>
-}
+<!-- ── Header with close button ──────────────────────────── -->
+<div class="dialog-header">
+	<button mat-icon-button (click)="close()">
+		<mat-icon>arrow_back</mat-icon>
+	</button>
+	<h2>Check Availability</h2>
+</div>
 
-@if (isSizeSelected()) {
-	<div mat-dialog-content class="cnc-check">
-		<h2 class="cnc-check__title">Check Availability</h2>
-		<p class="cnc-check__subtitle">
-			Enter the location or zip code to check which nearest store has the selected product
-		</p>
+<div mat-dialog-content class="cnc-check">
+	<mat-accordion>
+		<!-- ── Step 1: Select Size ───────────────────────────── -->
+		<mat-expansion-panel [expanded]="step() === 0">
+			<mat-expansion-panel-header>
+				<mat-panel-title>
+					@if (isSizeSelected()) {
+						Size: {{ size() }}
+					} @else {
+						Choose a size
+					}
+				</mat-panel-title>
+			</mat-expansion-panel-header>
 
-		<button mat-flat-button class="cnc-check__size-btn" (click)="isSizeSelected.set(false)">
-			Size Selected: {{ size() }}
-		</button>
-
-		<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
-			<mat-tab label="Address">
-				<div class="cnc-check__search-row">
-					<mat-form-field appearance="outline" class="cnc-check__field">
-						<mat-label>Zip code or address</mat-label>
-						<input
-							#searchInput
-							matInput
-							type="text"
-							placeholder="Enter zip code or address"
-						/>
-					</mat-form-field>
-					<button mat-icon-button type="button" (click)="currentLocation()">
-						<mat-icon fontSet="material-icons-outlined">room</mat-icon>
+			<div class="size-chips">
+				@for (sizeOption of data.sizes; track sizeOption) {
+					<button
+						mat-stroked-button
+						class="size-chip"
+						[class.size-chip--active]="size() === sizeOption"
+						(click)="changeSize(sizeOption)"
+					>
+						{{ sizeOption }}
 					</button>
-				</div>
+				}
+			</div>
+		</mat-expansion-panel>
 
-				@for (nearbyStore of nearbyStores(); track nearbyStore.store.id) {
-					<mat-divider />
-					<div class="cnc-check__result">
-						<div class="cnc-check__result-header">
-							<h3>{{ nearbyStore.store.name }}</h3>
-							<span class="cnc-check__filler"></span>
-							<mat-icon fontSet="material-icons-outlined">room</mat-icon>
-							<span>{{ nearbyStore.distance.toFixed(2) }} km</span>
-						</div>
-						<p class="cnc-check__address">{{ nearbyStore.store.address }}</p>
-						@if ((nearbyStore.stock ?? 0) > 5) {
-							<p class="cnc-check__stock cnc-stock--good">
-								Size {{ size() }} is in good stock
-							</p>
-						} @else if ((nearbyStore.stock ?? 0) > 0) {
-							<p class="cnc-check__stock cnc-stock--low">
-								Size {{ size() }} is almost sold out
-							</p>
-						} @else {
-							<p class="cnc-check__stock cnc-stock--out">
-								Size {{ size() }} is out of stock
+		<!-- ── Step 2: Find a Store ──────────────────────────── -->
+		<mat-expansion-panel [expanded]="step() === 1" [disabled]="!isSizeSelected()">
+			<mat-expansion-panel-header>
+				<mat-panel-title>Find a store</mat-panel-title>
+			</mat-expansion-panel-header>
+
+			<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+				<!-- Address tab -->
+				<mat-tab label="Address">
+					<div class="cnc-check__search-row">
+						<mat-form-field appearance="outline" class="cnc-check__field">
+							<mat-label>Zip code or address</mat-label>
+							<input
+								#searchInput
+								matInput
+								type="text"
+								placeholder="Enter zip code or address"
+							/>
+						</mat-form-field>
+						<button mat-icon-button type="button" (click)="useCurrentLocation()">
+							<mat-icon fontSet="material-icons-outlined">my_location</mat-icon>
+						</button>
+					</div>
+
+					<div class="cnc-check__results">
+						@for (nearbyStore of nearbyStores(); track nearbyStore.store.id) {
+							<cnc-store-card
+								[store]="nearbyStore.store"
+								[selected]="pendingStore()?.id === nearbyStore.store.id"
+								[stock]="nearbyStore.stock ?? null"
+								[distance]="nearbyStore.distance"
+								(storeSelect)="onStoreSelect($event)"
+							/>
+						} @empty {
+							<p class="cnc-check__empty-hint">
+								Search by address or use your current location to find stores.
 							</p>
 						}
 					</div>
-					<mat-divider />
-				}
-			</mat-tab>
+				</mat-tab>
 
-			<mat-tab label="Map">
-				@if (isSizeSelected()) {
-					<cnc-maps
-						[size]="size()"
-						[modelNo]="data.modelNo"
-						[variantId]="data.variantId"
-					/>
-				}
-			</mat-tab>
-		</mat-tab-group>
+				<!-- Map tab -->
+				<mat-tab label="Map">
+					@if (isSizeSelected()) {
+						<cnc-maps
+							[size]="size()"
+							[modelNo]="data.modelNo"
+							[variantId]="data.variantId"
+						/>
+					}
+				</mat-tab>
+			</mat-tab-group>
+		</mat-expansion-panel>
+	</mat-accordion>
+</div>
+
+<!-- ── Confirm store bar ────────────────────────────────── -->
+@if (pendingStore()) {
+	<div class="confirm-bar">
+		<button mat-flat-button class="cnc-btn" (click)="confirmStoreSelection()">
+			Confirm store
+		</button>
 	</div>
 }

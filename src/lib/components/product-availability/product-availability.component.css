@@ -1,68 +1,69 @@
-.cnc-availability {
-	padding: 16px;
+/* ── Dialog header ───────────────────────────────────────── */
+
+.dialog-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 8px 0;
 }
 
-.cnc-availability__title {
+.dialog-header h2 {
+	margin: 0;
 	font-size: 1.25rem;
 	font-weight: 600;
 	color: var(--mat-sys-on-surface, #1c1b1f);
 }
 
+/* ── Content ────────────────────────────────────────────── */
+
+.cnc-availability {
+	padding: 0 16px 16px;
+}
+
 .cnc-availability__subtitle {
 	font-size: 0.875rem;
 	color: var(--mat-sys-on-surface-variant, #49454f);
+	margin: 4px 0 12px;
 }
 
-.cnc-availability__search {
+.cnc-availability__search-row {
 	display: flex;
-	justify-content: center;
+	align-items: center;
+	gap: 8px;
 	padding: 12px 0;
 }
 
 .cnc-availability__field {
-	width: 100%;
-	max-width: 320px;
+	flex: 1;
 }
 
-.cnc-availability__result {
-	padding: 8px 0;
-	cursor: pointer;
+.cnc-availability__results {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 4px 0;
 }
 
-.cnc-availability__result:hover {
-	background: var(--mat-sys-surface-container-low, #f7f2fa);
-}
-
-.cnc-availability__address {
+.cnc-availability__empty-hint {
+	text-align: center;
+	padding: 24px 0;
 	font-size: 0.875rem;
 	color: var(--mat-sys-on-surface-variant, #49454f);
 }
 
-.cnc-availability__stock {
+/* ── Confirm bar ────────────────────────────────────────── */
+
+.confirm-bar {
 	display: flex;
-	align-items: center;
-	gap: 4px;
-	font-size: 0.8125rem;
-	color: var(--mat-sys-on-surface-variant, #49454f);
+	justify-content: center;
+	padding: 12px 16px;
+	border-top: 1px solid var(--mat-sys-outline-variant, #cac4d0);
 }
 
-.cnc-stock--good {
-	color: var(--mat-sys-primary, green);
-	font-size: 18px;
-	width: 18px;
-	height: 18px;
-}
-
-.cnc-stock--low {
-	color: var(--mat-sys-tertiary, #e6a700);
-	font-size: 18px;
-	width: 18px;
-	height: 18px;
-}
-
-.cnc-stock--out {
-	color: var(--mat-sys-error, red);
-	font-size: 18px;
-	width: 18px;
-	height: 18px;
+.cnc-btn {
+	background: var(--mat-sys-primary, #6750a4);
+	color: var(--mat-sys-on-primary, #fff);
+	border-radius: 20px;
+	font-weight: 600;
+	min-width: 160px;
 }

@@ -30,11 +30,13 @@ export interface CncSelectedStore {
 
 /**
  * Minimal store contract. Consumers extend with richer fields
- * (e.g. openingTime, description, reviews).
+ * (e.g. description, reviews).
  */
 export interface CncStore extends CncSelectedStore {
 	location: { lat: number; lng: number };
 	products: CncStoreProduct[];
+	/** Optional opening hours — used by DatePicker for min/max time bounds. */
+	openingTime?: { open: string; close: string };
 }
 
 /**

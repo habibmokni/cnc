@@ -1,0 +1,27 @@
+<div class="store-card" [class.selected]="selected()" (click)="onSelect()">
+	<div class="store-card-header">
+		<div class="store-icon-wrapper">
+			<mat-icon class="store-icon">store</mat-icon>
+		</div>
+		<div class="store-header-info">
+			<h3 class="store-name">{{ store().name }}</h3>
+			<span class="store-address">{{ store().address }}</span>
+		</div>
+		@if (stockLabel(); as label) {
+			<span
+				class="stock-badge"
+				[class.good]="stockClass() === 'good'"
+				[class.low]="stockClass() === 'low'"
+				[class.out]="stockClass() === 'out'"
+			>
+				{{ label }}
+			</span>
+		}
+		@if (distance() != null) {
+			<span class="store-distance">{{ distance()!.toFixed(1) }} km</span>
+		}
+		@if (selected()) {
+			<mat-icon class="check-icon">check_circle</mat-icon>
+		}
+	</div>
+</div>

@@ -1,6 +1,6 @@
 {
   "name": "@habibmokni/cnc",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Click & Collect Angular library — store selector, size picker, stock checks, Google Maps integration",
   "author": {
     "name": "habibmokni",

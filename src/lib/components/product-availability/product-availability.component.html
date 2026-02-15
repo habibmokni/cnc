@@ -1,12 +1,20 @@
+<!-- ── Header with close button ──────────────────────────── -->
+<div class="dialog-header">
+	<button mat-icon-button (click)="close()">
+		<mat-icon>arrow_back</mat-icon>
+	</button>
+	<h2>Store Availability</h2>
+</div>
+
 <div mat-dialog-content class="cnc-availability">
-	<h2 class="cnc-availability__title">Check Availability</h2>
 	<p class="cnc-availability__subtitle">
-		Enter the location or zip code to check which nearest store has the selected product
+		Enter a location or zip code to find the nearest store with your product.
 	</p>
 
 	<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center">
+		<!-- Address tab -->
 		<mat-tab label="Address">
-			<div class="cnc-availability__search">
+			<div class="cnc-availability__search-row">
 				<mat-form-field appearance="outline" class="cnc-availability__field">
 					<mat-label>Zip code or address</mat-label>
 					<input
@@ -16,28 +24,29 @@
 						placeholder="Enter zip code or address"
 					/>
 				</mat-form-field>
+				<button mat-icon-button type="button" (click)="useCurrentLocation()">
+					<mat-icon fontSet="material-icons-outlined">my_location</mat-icon>
+				</button>
 			</div>
 
-			@for (nearbyStore of nearbyStores(); track nearbyStore.store.id) {
-				<mat-divider />
-				<div class="cnc-availability__result" (click)="onStoreSelect(nearbyStore.store)">
-					<h3>{{ nearbyStore.store.name }}</h3>
-					<p class="cnc-availability__address">{{ nearbyStore.store.address }}</p>
-					<p class="cnc-availability__stock">
-						@if ((nearbyStore.stock ?? 0) > 5) {
-							<mat-icon class="cnc-stock--good">room</mat-icon>
-						} @else if ((nearbyStore.stock ?? 0) > 0) {
-							<mat-icon class="cnc-stock--low">room</mat-icon>
-						} @else {
-							<mat-icon class="cnc-stock--out">room</mat-icon>
-						}
-						{{ nearbyStore.distance.toFixed(2) }} km
+			<div class="cnc-availability__results">
+				@for (nearbyStore of nearbyStores(); track nearbyStore.store.id) {
+					<cnc-store-card
+						[store]="nearbyStore.store"
+						[selected]="pendingStore()?.id === nearbyStore.store.id"
+						[stock]="nearbyStore.stock ?? null"
+						[distance]="nearbyStore.distance"
+						(storeSelect)="onStoreSelect($event)"
+					/>
+				} @empty {
+					<p class="cnc-availability__empty-hint">
+						Search by address or use your current location to find stores.
 					</p>
-				</div>
-				<mat-divider />
-			}
+				}
+			</div>
 		</mat-tab>
 
+		<!-- Map tab -->
 		<mat-tab label="Map">
 			<cnc-maps
 				[cartProducts]="cartProducts()"
@@ -48,3 +57,12 @@
 		</mat-tab>
 	</mat-tab-group>
 </div>
+
+<!-- ── Confirm store bar ────────────────────────────────── -->
+@if (pendingStore()) {
+	<div class="confirm-bar">
+		<button mat-flat-button class="cnc-btn" (click)="confirmStoreSelection()">
+			Confirm store
+		</button>
+	</div>
+}

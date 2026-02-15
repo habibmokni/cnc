@@ -1,38 +1,45 @@
-.cnc-check,
-.cnc-check__size-picker {
-	padding: 16px;
+/* ── Dialog header ───────────────────────────────────────── */
+
+.dialog-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 8px 0;
 }
 
-.cnc-check__title {
+.dialog-header h2 {
+	margin: 0;
 	font-size: 1.25rem;
 	font-weight: 600;
 	color: var(--mat-sys-on-surface, #1c1b1f);
 }
 
-.cnc-check__subtitle {
-	font-size: 0.875rem;
-	color: var(--mat-sys-on-surface-variant, #49454f);
+/* ── Content ────────────────────────────────────────────── */
+
+.cnc-check {
+	padding: 0 16px 16px;
 }
 
-.cnc-check__size-item {
-	display: block;
-	height: 46px;
-	line-height: 46px;
-	padding: 0 24px;
-	font-size: 1rem;
-	color: var(--mat-sys-primary, #8b283d);
-	cursor: pointer;
+/* ── Size chips ─────────────────────────────────────────── */
+
+.size-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 8px 0;
 }
 
-.cnc-check__size-item:hover {
-	background: var(--mat-sys-surface-container-low, #f7f2fa);
+.size-chip {
+	min-width: 56px;
+	border-radius: 20px;
 }
 
-.cnc-check__size-btn {
-	width: 100%;
-	text-align: start;
-	margin-bottom: 8px;
+.size-chip--active {
+	background: var(--mat-sys-primary, #6750a4);
+	color: var(--mat-sys-on-primary, #fff);
 }
+
+/* ── Search row ─────────────────────────────────────────── */
 
 .cnc-check__search-row {
 	display: flex;
@@ -45,38 +52,33 @@
 	flex: 1;
 }
 
-.cnc-check__result {
-	padding: 8px 0;
-}
-
-.cnc-check__result-header {
+.cnc-check__results {
 	display: flex;
-	align-items: center;
-	gap: 4px;
+	flex-direction: column;
+	gap: 6px;
+	padding: 4px 0;
 }
 
-.cnc-check__filler {
-	flex: 1 1 auto;
-}
-
-.cnc-check__address {
+.cnc-check__empty-hint {
+	text-align: center;
+	padding: 24px 0;
 	font-size: 0.875rem;
 	color: var(--mat-sys-on-surface-variant, #49454f);
 }
 
-.cnc-check__stock {
-	font-size: 0.8125rem;
-	margin-top: 4px;
+/* ── Confirm bar ────────────────────────────────────────── */
+
+.confirm-bar {
+	display: flex;
+	justify-content: center;
+	padding: 12px 16px;
+	border-top: 1px solid var(--mat-sys-outline-variant, #cac4d0);
 }
 
-.cnc-stock--good {
-	color: var(--mat-sys-primary, green);
-}
-
-.cnc-stock--low {
-	color: var(--mat-sys-tertiary, #e6a700);
-}
-
-.cnc-stock--out {
-	color: var(--mat-sys-error, red);
+.cnc-btn {
+	background: var(--mat-sys-primary, #6750a4);
+	color: var(--mat-sys-on-primary, #fff);
+	border-radius: 20px;
+	font-weight: 600;
+	min-width: 160px;
 }

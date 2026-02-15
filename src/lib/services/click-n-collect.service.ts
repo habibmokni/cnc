@@ -114,7 +114,6 @@ export class ClickNCollectService<
 		this.distanceInKm.set(distances);
 	}
 
-
 	public findStockForSize(
 		storeProducts: readonly CncStoreProduct[],
 		modelNo: string,

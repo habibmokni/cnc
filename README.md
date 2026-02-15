@@ -39,7 +39,20 @@ The library is **not** iRun-specific. It defines minimal interfaces and uses gen
 
 ---
 
-## What's new in v2
+## What's new in v2.1
+
+| Area | Before | v2.1 |
+|------|--------|------|
+| Stock checks | Read from stale `user.storeSelected.products` | **Resolved from `stores` input** — always fresh data |
+| Store selection | Flat list, no stock indicators | **Store cards with stock badges** (`In stock` / `Low stock` / `Unavailable`), "Change store" toggle |
+| Date/Time picker | Custom day/time chips | **Material DatePicker + TimePicker** — weekday filter, 30-min intervals, opening-hours bounds |
+| Unavailable items | Generic "not all available" message | **Per-item display** with image, name, size, and "Remove unavailable" action |
+| Checkout summary | None | **Green confirmation banner** after store + date + time selection |
+| Availability dialogs | No close button, broken search | **Close/back button**, "Use my location", **accordion steps** (size → store), **"Confirm store" button** |
+| New component | — | **`<cnc-store-card>`** — reusable store card with stock badge, distance, selected state |
+| `CncStore` type | No opening hours | Optional `openingTime?: { open: string; close: string }` |
+
+### What's new in v2.0
 
 | Area | v1 (Angular 12) | v2 (Angular 21) |
 |------|-----------------|-----------------|
@@ -83,10 +96,11 @@ import {
   StoreSelectorComponent,
   SizeSelectorComponent,
   ClickNCollectComponent,
+  StoreCardComponent,
 } from '@habibmokni/cnc';
 
 @Component({
-  imports: [StoreSelectorComponent, SizeSelectorComponent, ClickNCollectComponent],
+  imports: [StoreSelectorComponent, SizeSelectorComponent, ClickNCollectComponent, StoreCardComponent],
   // ...
 })
 export class MyComponent {}
@@ -169,13 +183,24 @@ export class AppComponent {
 <!-- Size picker with stock awareness -->
 <cnc-size-selector [product]="product" (sizeSelected)="onSize($event)" />
 
-<!-- Full checkout flow -->
+<!-- Full checkout flow (v2.1 — pass stores directly!) -->
 <cnc-click-n-collect
-  [user]="user"
+  [stores]="stores"
   [cartProducts]="cart"
+  [user]="user"
+  (storeChanged)="onStore($event)"
   (dateSelected)="onDate($event)"
   (timeSelected)="onTime($event)"
-  (storeChanged)="onStore($event)" />
+  (productsToRemove)="onRemove($event)"
+  (isAllItemsAvailable)="onAvailability($event)" />
+
+<!-- Reusable store card (new in v2.1) -->
+<cnc-store-card
+  [store]="store"
+  [selected]="isSelected"
+  [stock]="stockLevel"
+  [distance]="distanceKm"
+  (storeSelect)="onSelect($event)" />
 ```
 
 ### 5. Google Maps
@@ -194,7 +219,7 @@ The library defines **only the fields it needs**. Consumers extend with richer t
 
 | Interface | Fields | Purpose |
 |-----------|--------|---------|
-| `CncStore` | `id`, `name`, `address`, `location`, `products` | Store contract |
+| `CncStore` | `id`, `name`, `address`, `location`, `products`, `openingTime?` | Store contract |
 | `CncSelectedStore` | `id`, `name`, `address`, `products?` | Lightweight store ref on user |
 | `CncStoreProduct` | `modelNo`, `variants` | In-store inventory item |
 | `CncVariant` | `variantId`, `sizes`, `inStock` | Size/stock data per variant |
@@ -234,12 +259,28 @@ This means:
 
 | Selector | Description |
 |----------|-------------|
-| `<cnc-click-n-collect>` | Main checkout flow (store + date/time picker + stock checks) |
+| `<cnc-click-n-collect>` | Main checkout flow — store cards with stock badges, Material DatePicker/TimePicker, unavailable items, summary banner |
+| `<cnc-store-card>` | **New in v2.1** — Reusable store card with stock badge, distance, selected state |
 | `<cnc-store-selector>` | Google Maps store picker with address autocomplete |
 | `<cnc-size-selector>` | Size picker with per-store stock awareness |
-| `<cnc-product-availability>` | Store availability dialog |
-| `<cnc-check-availability>` | Size-aware availability checker dialog |
+| `<cnc-product-availability>` | Store availability dialog — close button, "Use my location", store cards, "Confirm store" |
+| `<cnc-check-availability>` | Size-aware availability checker — accordion steps (size → store), address/map tabs, "Confirm store" |
 | `<cnc-maps>` | Google Maps wrapper with markers, info windows, directions |
+
+---
+
+## Architecture (v2.1)
+
+cnc is a **pure UI + logic plugin**. It:
+
+- **Receives** ALL data via component inputs (`stores`, `cartProducts`, `user`)
+- **Emits** ALL actions via outputs (`storeChanged`, `productsToRemove`, `dateSelected`, `timeSelected`)
+- **Never** manages auth, writes to any database, or owns user/cart/store state
+- The host app is the **single source of truth** — cnc adds Click & Collect UI on top
+
+The `ClickNCollectService` is a lightweight **in-memory coordination layer** for sharing state between cnc's internal components (maps, store selector, size selector). Components feed it via inputs.
+
+> **Key fix in v2.1:** Stock checks now resolve the full store from the `stores` input by ID — never from the potentially stale `user.storeSelected.products`.
 
 ---
 

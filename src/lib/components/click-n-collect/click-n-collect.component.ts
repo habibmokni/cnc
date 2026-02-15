@@ -7,19 +7,18 @@ import {
 	input,
 	output,
 	signal,
-	viewChild,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
-import { MatCardModule } from '@angular/material/card';
+import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatTimepickerModule } from '@angular/material/timepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
-import { ProductAvailabilityComponent } from '../product-availability/product-availability.component';
+import { StoreCardComponent } from '../store-card/store-card.component';
 import { CncCartItem } from '../../types/cart.type';
 import { CncStore } from '../../types/store.type';
 import { CncUser } from '../../types/user.type';
@@ -28,140 +27,224 @@ import { CncUser } from '../../types/user.type';
 	selector: 'cnc-click-n-collect',
 	standalone: true,
 	imports: [
-		RouterModule,
-		MatExpansionModule,
-		MatCardModule,
+		DatePipe,
 		MatButtonModule,
 		MatIconModule,
-		MatRadioModule,
 		MatDividerModule,
+		MatDatepickerModule,
+		MatTimepickerModule,
+		MatFormFieldModule,
+		MatInputModule,
+		StoreCardComponent,
 	],
+	providers: [provideNativeDateAdapter()],
 	templateUrl: './click-n-collect.component.html',
 	styleUrl: './click-n-collect.component.css',
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClickNCollectComponent {
-	private readonly router = inject(Router);
-	private readonly dialog = inject(MatDialog);
 	private readonly cncService = inject(ClickNCollectService);
 
-	private readonly expansionPanel = viewChild<MatExpansionPanel>('timePanel');
+	// ── Inputs ────────────────────────────────────────────────────
+	public readonly stores = input<CncStore[]>([]);
+	public readonly cartProducts = input<CncCartItem[]>([]);
+	public readonly user = input<CncUser | null>(null);
 
-	public readonly cartProductsInput = input<CncCartItem[]>([], {
-		alias: 'cartProducts',
-	});
-	public readonly storesInput = input<CncStore[]>([], { alias: 'stores' });
-	public readonly userInput = input<CncUser | null>(null, { alias: 'user' });
-	public readonly storeLocationsInput = input<google.maps.LatLngLiteral[]>([], {
-		alias: 'storeLocations',
-	});
-
+	// ── Outputs ───────────────────────────────────────────────────
+	public readonly storeChanged = output<CncStore>();
 	public readonly dateSelected = output<Date>();
+	public readonly timeSelected = output<string>();
 	public readonly productsToRemove = output<CncCartItem[]>();
 	public readonly orderPrice = output<number>();
-	public readonly timeSelected = output<string>();
-	public readonly storeChanged = output<CncStore>();
 	public readonly isAllItemsAvailable = output<boolean>();
 
-	protected readonly user = computed(() => this.cncService.user() ?? this.userInput());
+	// ── Store selection state ─────────────────────────────────────
+	protected readonly selectedStoreId = signal<string | null>(null);
+	protected readonly otherStoresExpanded = signal(false);
 
-	protected readonly cartProducts = computed(() => {
-		const fromService = this.cncService.cartProducts();
-		return fromService.length > 0 ? fromService : this.cartProductsInput();
+	/** Resolve full store from the stores input (fresh product data). */
+	protected readonly selectedStore = computed<CncStore | null>(() => {
+		const id = this.selectedStoreId();
+		if (!id) return null;
+		return this.stores().find((store) => store.id === id) ?? null;
 	});
 
-	protected readonly isStoreSelected = computed(() => !!this.user()?.storeSelected);
+	/** All stores except the selected one. */
+	protected readonly otherStores = computed<CncStore[]>(() => {
+		const id = this.selectedStoreId();
+		if (!id) return [];
+		return this.stores().filter((store) => store.id !== id);
+	});
 
-	protected readonly stockCheck = computed(() => {
-		const user = this.user();
-		const cart = this.cartProducts();
-		if (!user?.storeSelected?.products) {
-			return {
-				allAvailable: true,
-				unavailable: [] as CncCartItem[],
-				total: 0,
-			};
+	// ── Stock computation — from stores input, NOT user.storeSelected ──
+	protected readonly stockMap = computed<Record<string, number>>(() => {
+		const allStores = this.stores();
+		const cartItems = this.cartProducts();
+		if (!allStores.length || !cartItems.length) return {};
+		const map: Record<string, number> = {};
+		for (const store of allStores) {
+			let allAvailable = true;
+			for (const cartItem of cartItems) {
+				const storeProduct = store.products?.find(
+					(product) => product.modelNo === cartItem.modelNo,
+				);
+				if (!storeProduct?.variants?.[0]) {
+					allAvailable = false;
+					break;
+				}
+				const variant =
+					storeProduct.variants.find((v) => v.variantId === cartItem.variantId) ??
+					storeProduct.variants[0];
+				const sizeIndex = variant.sizes?.indexOf(cartItem.size) ?? -1;
+				const stock = sizeIndex >= 0 ? +(variant.inStock?.[sizeIndex] ?? 0) : 0;
+				if (stock < cartItem.noOfItems) {
+					allAvailable = false;
+					break;
+				}
+			}
+			map[store.id] = allAvailable ? 10 : 0;
 		}
-		return this.cncService.checkCartStock(cart, user.storeSelected.products);
+		return map;
 	});
 
-	protected readonly allItemsAvailable = computed(() => this.stockCheck().allAvailable);
-	protected readonly cartItemUnavailable = computed(() => this.stockCheck().unavailable);
-	protected readonly grandTotal = computed(() => this.stockCheck().total);
+	/** Distance map — from service distances aligned to stores. */
+	protected readonly distanceMap = computed<Record<string, number>>(() => {
+		const distances = this.cncService.distanceInKm();
+		const allStores = this.stores();
+		const map: Record<string, number> = {};
+		allStores.forEach((store, idx) => {
+			map[store.id] = distances[idx] ?? Infinity;
+		});
+		return map;
+	});
 
-	protected readonly date = signal<Date | null>(null);
-	protected readonly times = signal<number[]>([]);
-	protected readonly selectedDayIndex = signal(-1);
+	/** Unavailable products at the selected store. */
+	protected readonly unavailableProducts = computed<CncCartItem[]>(() => {
+		const store = this.selectedStore();
+		if (!store) return [];
+		const cartItems = this.cartProducts();
+		const unavailable: CncCartItem[] = [];
+		for (const cartItem of cartItems) {
+			const storeProduct = store.products?.find(
+				(product) => product.modelNo === cartItem.modelNo,
+			);
+			if (!storeProduct) {
+				unavailable.push(cartItem);
+				continue;
+			}
+			const variant = storeProduct.variants?.find((v) => v.variantId === cartItem.variantId);
+			if (!variant) {
+				unavailable.push(cartItem);
+				continue;
+			}
+			const sizeIndex = variant.sizes?.indexOf(cartItem.size) ?? -1;
+			const stock = sizeIndex >= 0 ? (variant.inStock?.[sizeIndex] ?? 0) : 0;
+			if (stock < cartItem.noOfItems) {
+				unavailable.push(cartItem);
+			}
+		}
+		return unavailable;
+	});
 
-	protected readonly calendar: Date[] = [];
-	protected readonly days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-	private readonly currentTime: number;
+	protected readonly allAvailable = computed(
+		() => this.selectedStore() != null && this.unavailableProducts().length === 0,
+	);
+
+	/** Grand total of cart items. */
+	protected readonly grandTotal = computed(() => {
+		return this.cartProducts().reduce((sum, item) => sum + item.price * item.noOfItems, 0);
+	});
+
+	// ── Date/Time — Material DatePicker + TimePicker ──────────────
+	protected readonly selectedDate = signal<Date | null>(null);
+	protected readonly selectedTime = signal<string | null>(null);
+
+	protected readonly minDate = new Date();
+	protected readonly maxDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+
+	/** Filter: weekdays only (Mon-Fri). */
+	protected readonly weekdayFilter = (date: Date | null): boolean => {
+		if (!date) return false;
+		const day = date.getDay();
+		return day !== 0 && day !== 6;
+	};
+
+	/** Min pickup time based on selected store's opening hours. */
+	protected readonly minTime = computed<Date>(() => {
+		const store = this.selectedStore();
+		const hour = store?.openingTime?.open ? parseInt(store.openingTime.open, 10) : 10;
+		const d = new Date();
+		d.setHours(isNaN(hour) ? 10 : hour, 0, 0, 0);
+		return d;
+	});
+
+	/** Max pickup time based on selected store's closing hours. */
+	protected readonly maxTime = computed<Date>(() => {
+		const store = this.selectedStore();
+		const hour = store?.openingTime?.close ? parseInt(store.openingTime.close, 10) : 19;
+		const d = new Date();
+		d.setHours(isNaN(hour) ? 19 : hour, 0, 0, 0);
+		return d;
+	});
+
+	/** Summary is complete when store + date + time are all selected. */
+	protected readonly isComplete = computed(
+		() =>
+			this.selectedStore() != null &&
+			this.selectedDate() != null &&
+			this.selectedTime() != null,
+	);
 
 	public constructor() {
-		const now = new Date();
-		const day = now.getDate();
-		const month = now.getMonth();
-		const year = now.getFullYear();
-		this.currentTime = now.getHours();
-
-		for (let i = 0; i < 7; i++) {
-			if (i === 0 && this.currentTime > 19) continue;
-			this.calendar.push(new Date(year, month, day + i));
-		}
-
+		// Pre-select user's previously chosen store on init.
 		effect(() => {
-			const store = this.cncService.selectedStore();
+			const currentUser = this.user();
+			if (currentUser?.storeSelected?.id && !this.selectedStoreId()) {
+				this.selectedStoreId.set(currentUser.storeSelected.id);
+			}
+		});
+
+		// Emit outputs reactively.
+		effect(() => {
+			const store = this.selectedStore();
 			if (store) {
 				this.storeChanged.emit(store);
+				this.cncService.selectStore(store);
 			}
 		});
 
 		effect(() => {
-			const user = this.user();
-			if (!user?.storeSelected) return;
-			const { total, allAvailable } = this.stockCheck();
-			this.orderPrice.emit(total);
-			this.isAllItemsAvailable.emit(allAvailable);
+			this.orderPrice.emit(this.grandTotal());
+			this.isAllItemsAvailable.emit(this.allAvailable());
 		});
 	}
 
-	protected onDaySelect(index: number, date: Date): void {
-		if (this.selectedDayIndex() === index) {
-			this.selectedDayIndex.set(-1);
-			this.times.set([]);
+	// ── Actions ───────────────────────────────────────────────────
+	protected onStoreSelect(store: CncStore): void {
+		this.selectedStoreId.set(store.id);
+		this.otherStoresExpanded.set(false);
+	}
+
+	protected onDateChange(date: Date | null): void {
+		this.selectedDate.set(date);
+		if (date) {
+			this.dateSelected.emit(date);
+		}
+	}
+
+	protected onTimeChange(time: Date | null): void {
+		if (!time) {
+			this.selectedTime.set(null);
 			return;
 		}
-
-		this.selectedDayIndex.set(index);
-		this.date.set(date);
-		this.dateSelected.emit(date);
-
-		const now = new Date();
-		const start = date.toDateString() === now.toDateString() ? this.currentTime + 1 : 10;
-		const newTimes: number[] = [];
-		for (let i = start; i < 20; i++) {
-			newTimes.push(i);
-		}
-		this.times.set(newTimes);
+		const hours = time.getHours().toString().padStart(2, '0');
+		const minutes = time.getMinutes().toString().padStart(2, '0');
+		const formatted = `${hours}:${minutes}`;
+		this.selectedTime.set(formatted);
+		this.timeSelected.emit(formatted);
 	}
 
-	protected onTimeSelected(time: number): void {
-		this.timeSelected.emit(`${time}:00 - ${time + 1}:00`);
-		this.expansionPanel()?.close();
-	}
-
-	protected onOpenDialog(): void {
-		this.dialog.open(ProductAvailabilityComponent, {
-			data: { call: 'checkout' },
-		});
-	}
-
-	protected removeProductsUnavailable(): void {
-		this.productsToRemove.emit(this.cartItemUnavailable());
-		this.isAllItemsAvailable.emit(true);
-	}
-
-	protected selectStore(): void {
-		this.router.navigate(['/storeselector']);
+	protected removeUnavailable(): void {
+		this.productsToRemove.emit(this.unavailableProducts());
 	}
 }
