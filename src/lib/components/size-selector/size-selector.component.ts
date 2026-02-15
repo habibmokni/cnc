@@ -19,7 +19,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { ProductAvailabilityComponent } from '../product-availability/product-availability.component';
-import { CncStoreProduct } from '../../types/store.type';
+import { CncStoreProduct, CncVariant } from '../../types/store.type';
 
 @Component({
   selector: 'cnc-size-selector',
@@ -42,56 +42,59 @@ export class SizeSelectorComponent {
   private readonly expansionPanel =
     viewChild<MatExpansionPanel>('panel');
 
-  // ── Inputs / Outputs ───────────────────────────────────────────
   public readonly product = input<CncStoreProduct | null>(null);
   public readonly sizeSelected = output<number>();
 
-  // ── Local state ────────────────────────────────────────────────
   protected readonly size = signal(0);
   protected readonly isSizeSelected = signal(false);
 
-  // ── Derived ────────────────────────────────────────────────────
   protected readonly user = computed(() => this.cncService.user());
 
-  /** Reactive stock count — recalculates when user or size changes. */
+  protected readonly firstVariant = computed<CncVariant | null>(() => {
+    const product = this.product();
+    return product?.variants?.[0] ?? null;
+  });
+
   protected readonly stock = computed(() => {
-    const u = this.user();
-    const p = this.product();
-    const s = this.size();
-    if (!u?.storeSelected?.products || !p || s === 0) return 0;
+    const user = this.user();
+    const product = this.product();
+    const variant = this.firstVariant();
+    const selectedSize = this.size();
+    if (!user?.storeSelected?.products || !product || !variant || selectedSize === 0) return 0;
     return this.cncService.findStockForSize(
-      u.storeSelected.products,
-      p.modelNo,
-      p.variants[0].variantId,
-      s,
+      user.storeSelected.products,
+      product.modelNo,
+      variant.variantId,
+      selectedSize,
     );
   });
 
-  // ── Actions ────────────────────────────────────────────────────
   protected onSizeSelect(
     selectedSize: number,
     index: number,
+    variant: CncVariant,
     product: CncStoreProduct,
   ): void {
     this.size.set(selectedSize);
     this.sizeSelected.emit(selectedSize);
     this.isSizeSelected.set(true);
 
-    if (+product.variants[0].instock[index] === 0 && this.stock() === 0) {
+    if (+variant.instock[index] === 0 && this.stock() === 0) {
       this.openDialog(product);
     }
     this.expansionPanel()?.close();
   }
 
   protected openDialog(product: CncStoreProduct): void {
-    if (!this.isSizeSelected()) return;
+    const variant = this.firstVariant();
+    if (!this.isSizeSelected() || !variant) return;
     this.dialog.open(ProductAvailabilityComponent, {
       data: {
         call: 'size-selector',
         size: this.size(),
         modelNo: product.modelNo,
-        sizes: product.variants[0].sizes,
-        variantId: product.variants[0].variantId,
+        sizes: variant.sizes,
+        variantId: variant.variantId,
       },
       maxWidth: '100vw',
       maxHeight: '100vh',

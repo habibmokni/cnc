@@ -45,11 +45,11 @@ export class MapsComponent {
 
   // ── Derived from service + inputs ──────────────────────────────
   private readonly filteredData = computed(() => {
-    const s = this.size();
-    if (s > 0) {
+    const selectedSize = this.size();
+    if (selectedSize > 0) {
       return this.cncService.filterByProductAvailability(
         this.modelNo(),
-        s,
+        selectedSize,
         this.variantId(),
       );
     }

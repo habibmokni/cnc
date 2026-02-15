@@ -78,9 +78,9 @@ export class ClickNCollectService<
    */
   public selectStore(store: TStore): void {
     this.selectedStore.set(store);
-    const u = this.user();
-    if (u) {
-      this.user.set({ ...u, storeSelected: store } as TUser);
+    const currentUser = this.user();
+    if (currentUser) {
+      this.user.set({ ...currentUser, storeSelected: store } as TUser);
     } else {
       // Safe: library only reads `storeSelected` from the user.
       // Consumer-specific fields won't exist on anonymous users.

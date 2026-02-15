@@ -86,16 +86,16 @@ export class ClickNCollectComponent {
 
   /** Pure stock derivation — recalculates whenever user or cart changes. */
   protected readonly stockCheck = computed(() => {
-    const u = this.user();
+    const user = this.user();
     const cart = this.cartProducts();
-    if (!u?.storeSelected?.products) {
+    if (!user?.storeSelected?.products) {
       return {
         allAvailable: true,
         unavailable: [] as CncCartItem[],
         total: 0,
       };
     }
-    return this.cncService.checkCartStock(cart, u.storeSelected.products);
+    return this.cncService.checkCartStock(cart, user.storeSelected.products);
   });
 
   protected readonly allItemsAvailable = computed(
@@ -137,8 +137,8 @@ export class ClickNCollectComponent {
 
     // Emit stock-related outputs when derivation changes
     effect(() => {
-      const u = this.user();
-      if (!u?.storeSelected) return;
+      const user = this.user();
+      if (!user?.storeSelected) return;
       const { total, allAvailable } = this.stockCheck();
       this.orderPrice.emit(total);
       this.isAllItemsAvailable.emit(allAvailable);
