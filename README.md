@@ -4,6 +4,38 @@
 
 [![Angular](https://img.shields.io/badge/Angular-21-dd0031)](https://angular.dev)
 [![Material](https://img.shields.io/badge/Material-3-6750A4)](https://material.angular.io)
+[![GitHub](https://img.shields.io/badge/GitHub-Package-181717)](https://github.com/habibmokni/cnc)
+
+---
+
+## Proof of concept
+
+This library is consumed by [**iRun Shop**](https://github.com/habibmokni/iRun-Shop) — a running shoe e-commerce PWA built with Angular 21, Angular Material 3, and Firebase.
+
+| | |
+|---|---|
+| **Live demo** | [irun-shop.web.app](https://irun-shop.web.app) |
+| **Consumer repo** | [github.com/habibmokni/iRun-Shop](https://github.com/habibmokni/iRun-Shop) |
+| **Library repo** | [github.com/habibmokni/cnc](https://github.com/habibmokni/cnc) |
+
+iRun Shop uses the cnc library for store selection, size-based stock checking, product availability, and the full Click & Collect checkout flow. The two repos are designed to work together:
+
+```
+┌─────────────────────────────┐      ┌──────────────────────────┐
+│  iRun Shop (consumer app)   │      │  @habibmokni/cnc (lib)   │
+│                             │      │                          │
+│  ShoeStore extends CncStore │─────▶│  CncStore                │
+│  ShoeCartItem extends       │      │  CncCartItem             │
+│    CncCartItem              │      │  CncUser                 │
+│  ShoeUser extends CncUser   │      │  ClickNCollectService    │
+│                             │      │  <cnc-store-selector>    │
+│  Firebase (auth + data)     │      │  <cnc-size-selector>     │
+│  Google Maps API key        │      │  <cnc-click-n-collect>   │
+│  M3 theme (light + dark)    │      │  <cnc-maps>              │
+└─────────────────────────────┘      └──────────────────────────┘
+```
+
+The library is **not** iRun-specific. It defines minimal interfaces and uses generics, so any e-commerce app (books, electronics, groceries) can plug in its own types.
 
 ---
 
@@ -217,15 +249,17 @@ All components use Material 3 CSS custom properties. They automatically inherit 
 
 ```css
 /* Components respond to these tokens */
---mat-sys-primary
---mat-sys-on-primary
+--mat-sys-primary          /* interactive elements */
+--mat-sys-on-primary       /* text on primary */
+--mat-sys-tertiary         /* caution / low-stock indicators */
+--mat-sys-error            /* out-of-stock / errors */
 --mat-sys-surface-container
---mat-sys-on-surface
---mat-sys-on-surface-variant
---mat-sys-error
+--mat-sys-on-surface       /* primary text */
+--mat-sys-on-surface-variant /* secondary text */
+--mat-sys-outline-variant  /* borders / dividers */
 ```
 
-Both **light mode** and **dark mode** are supported out of the box.
+Both **light mode** and **dark mode** are supported out of the box. Zero hardcoded colors — every value is a `var(--mat-sys-*)` token with a sensible fallback.
 
 ---
 
