@@ -74,7 +74,7 @@
 }
 
 .cnc-stock--low {
-  color: #e6a700;
+  color: var(--mat-sys-tertiary, #e6a700);
 }
 
 .cnc-stock--out {
