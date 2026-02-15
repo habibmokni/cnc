@@ -19,7 +19,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
-import { NearbyStore } from '../../types/store.type';
+import { CncNearbyStore } from '../../types/store.type';
+import { CheckAvailabilityDialogData } from '../../types/dialog.type';
 
 @Component({
   selector: 'cnc-check-availability',
@@ -42,13 +43,14 @@ import { NearbyStore } from '../../types/store.type';
 export class CheckAvailabilityComponent {
   private readonly ngZone = inject(NgZone);
   private readonly cncService = inject(ClickNCollectService);
-  protected readonly data: any = inject(MAT_DIALOG_DATA);
+  protected readonly data: CheckAvailabilityDialogData =
+    inject(MAT_DIALOG_DATA);
 
   private readonly searchInput =
     viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
   // ── Local state ────────────────────────────────────────────────
-  protected readonly nearbyStores = signal<NearbyStore[]>([]);
+  protected readonly nearbyStores = signal<CncNearbyStore[]>([]);
   protected readonly size = signal(0);
   protected readonly isSizeSelected = signal(false);
 

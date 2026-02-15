@@ -1,19 +1,19 @@
-/** The user's selected store reference. */
-export type SelectedStore = Readonly<{
-  id: string;
-  name: string;
-  address: string;
-  products?: any[];
-}>;
+import { CncSelectedStore } from './store.type';
 
-/** The current user. */
-export type CncUser = Readonly<{
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  email?: string;
-  address?: string;
-  zipCode?: string;
-  storeSelected: SelectedStore;
-  wishlist?: string[];
-}>;
+/**
+ * Minimal user contract — only `storeSelected` is required by cnc.
+ * Consumers extend with their own fields (e.g. email, firstName, wishlist).
+ *
+ * @example
+ * ```ts
+ * interface ShopUser extends CncUser {
+ *   firstName: string;
+ *   lastName: string;
+ *   email: string;
+ *   wishlist: string[];
+ * }
+ * ```
+ */
+export interface CncUser {
+  storeSelected: CncSelectedStore;
+}

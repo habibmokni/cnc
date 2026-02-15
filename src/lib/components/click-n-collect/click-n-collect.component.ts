@@ -23,8 +23,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { ProductAvailabilityComponent } from '../product-availability/product-availability.component';
-import { CartProduct } from '../../types/cart.type';
-import { Store } from '../../types/store.type';
+import { CncCartItem } from '../../types/cart.type';
+import { CncStore } from '../../types/store.type';
 import { CncUser } from '../../types/user.type';
 
 @Component({
@@ -51,23 +51,26 @@ export class ClickNCollectComponent {
   private readonly expansionPanel =
     viewChild<MatExpansionPanel>('timePanel');
 
-  public readonly cartProductsInput = input<CartProduct[]>([], {
+  // ── Inputs ─────────────────────────────────────────────────────
+  public readonly cartProductsInput = input<CncCartItem[]>([], {
     alias: 'cartProducts',
   });
-  public readonly storesInput = input<Store[]>([], { alias: 'stores' });
+  public readonly storesInput = input<CncStore[]>([], { alias: 'stores' });
   public readonly userInput = input<CncUser | null>(null, { alias: 'user' });
   public readonly storeLocationsInput = input<google.maps.LatLngLiteral[]>(
     [],
     { alias: 'storeLocations' },
   );
 
+  // ── Outputs ────────────────────────────────────────────────────
   public readonly dateSelected = output<Date>();
-  public readonly productsToRemove = output<CartProduct[]>();
+  public readonly productsToRemove = output<CncCartItem[]>();
   public readonly orderPrice = output<number>();
   public readonly timeSelected = output<string>();
-  public readonly storeChanged = output<Store>();
+  public readonly storeChanged = output<CncStore>();
   public readonly isAllItemsAvailable = output<boolean>();
 
+  // ── Derived state (pure computeds) ─────────────────────────────
   protected readonly user = computed(
     () => this.cncService.user() ?? this.userInput(),
   );
@@ -81,13 +84,14 @@ export class ClickNCollectComponent {
     () => !!this.user()?.storeSelected,
   );
 
+  /** Pure stock derivation — recalculates whenever user or cart changes. */
   protected readonly stockCheck = computed(() => {
     const u = this.user();
     const cart = this.cartProducts();
     if (!u?.storeSelected?.products) {
       return {
         allAvailable: true,
-        unavailable: [] as CartProduct[],
+        unavailable: [] as CncCartItem[],
         total: 0,
       };
     }
@@ -102,6 +106,7 @@ export class ClickNCollectComponent {
   );
   protected readonly grandTotal = computed(() => this.stockCheck().total);
 
+  // ── Local mutable state (calendar / time slots) ────────────────
   protected readonly date = signal<Date | null>(null);
   protected readonly times = signal<number[]>([]);
   protected readonly selectedDayIndex = signal(-1);
@@ -122,7 +127,7 @@ export class ClickNCollectComponent {
       this.calendar.push(new Date(year, month, day + i));
     }
 
-
+    // Emit storeChanged when a new store is selected
     effect(() => {
       const store = this.cncService.selectedStore();
       if (store) {
@@ -130,6 +135,7 @@ export class ClickNCollectComponent {
       }
     });
 
+    // Emit stock-related outputs when derivation changes
     effect(() => {
       const u = this.user();
       if (!u?.storeSelected) return;
@@ -139,6 +145,7 @@ export class ClickNCollectComponent {
     });
   }
 
+  // ── Actions ────────────────────────────────────────────────────
   protected onDaySelect(index: number, date: Date): void {
     if (this.selectedDayIndex() === index) {
       this.selectedDayIndex.set(-1);

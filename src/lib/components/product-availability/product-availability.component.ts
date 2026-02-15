@@ -23,8 +23,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
-import { Store, NearbyStore } from '../../types/store.type';
-import { CartProduct } from '../../types/cart.type';
+import { CncStore, CncNearbyStore } from '../../types/store.type';
+import { ProductAvailabilityDialogData } from '../../types/dialog.type';
 
 @Component({
   selector: 'cnc-product-availability',
@@ -48,7 +48,8 @@ export class ProductAvailabilityComponent {
   private readonly ngZone = inject(NgZone);
   private readonly cncService = inject(ClickNCollectService);
   private readonly dialog = inject(MatDialog);
-  protected readonly data: any = inject(MAT_DIALOG_DATA);
+  protected readonly data: ProductAvailabilityDialogData =
+    inject(MAT_DIALOG_DATA);
 
   private readonly searchInput =
     viewChild<ElementRef<HTMLInputElement>>('searchInput');
@@ -58,7 +59,7 @@ export class ProductAvailabilityComponent {
     () => this.cncService.cartProducts(),
   );
 
-  protected readonly nearbyStores = signal<NearbyStore[]>([]);
+  protected readonly nearbyStores = signal<CncNearbyStore[]>([]);
 
   constructor() {
     effect((onCleanup) => {
@@ -82,9 +83,9 @@ export class ProductAvailabilityComponent {
           ) {
             this.nearbyStores.set(
               this.cncService.checkProductAvailability(
-                this.data.modelNo,
-                this.data.size,
-                this.data.variantId,
+                this.data.modelNo ?? '',
+                this.data.size ?? 0,
+                this.data.variantId ?? '',
               ),
             );
           }
@@ -103,7 +104,7 @@ export class ProductAvailabilityComponent {
     });
   }
 
-  protected onStoreSelect(store: Store): void {
+  protected onStoreSelect(store: CncStore): void {
     this.cncService.selectStore(store);
     this.dialog.closeAll();
   }

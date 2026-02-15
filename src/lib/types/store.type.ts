@@ -1,38 +1,48 @@
-/** A product variant with sizes and stock counts per size. */
-export type StoreVariant = Readonly<{
+/**
+ * Minimal variant contract for stock checking.
+ * Consumers may extend with extra fields (e.g. color, sku).
+ */
+export interface CncVariant {
   variantId: string;
   sizes: number[];
   instock: number[];
-}>;
+}
 
-/** A product carried by a store, with its variants. */
-export type StoreProduct = Readonly<{
+/**
+ * Minimal product contract for in-store inventory.
+ * Consumers may extend with extra fields (e.g. brand, images).
+ */
+export interface CncStoreProduct {
   modelNo: string;
-  variants: StoreVariant[];
-}>;
+  variants: CncVariant[];
+}
 
-/** Opening hours for a store. */
-export type OpeningTime = Readonly<{
-  open: string;
-  close: string;
-}>;
-
-/** A physical store location. */
-export type Store = Readonly<{
+/**
+ * Subset of CncStore carried on the user after selection.
+ * Products are optional — may not be populated yet.
+ */
+export interface CncSelectedStore {
   id: string;
   name: string;
   address: string;
-  location: { lat: number; lng: number };
-  openingTime: OpeningTime;
-  description?: string;
-  reviews?: string;
-  isDefault?: boolean;
-  products: StoreProduct[];
-}>;
+  products?: CncStoreProduct[];
+}
 
-/** A store with computed distance from the user. */
-export type NearbyStore = Readonly<{
-  store: Store;
+/**
+ * Minimal store contract. Consumers extend with richer fields
+ * (e.g. openingTime, description, reviews).
+ */
+export interface CncStore extends CncSelectedStore {
+  location: { lat: number; lng: number };
+  products: CncStoreProduct[];
+}
+
+/**
+ * A store paired with computed distance and optional stock count.
+ * Generic so the consumer's richer store type is preserved.
+ */
+export interface CncNearbyStore<TStore extends CncStore = CncStore> {
+  store: TStore;
   distance: number;
   stock?: number;
-}>;
+}

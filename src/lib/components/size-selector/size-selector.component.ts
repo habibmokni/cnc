@@ -19,6 +19,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { ProductAvailabilityComponent } from '../product-availability/product-availability.component';
+import { CncStoreProduct } from '../../types/store.type';
 
 @Component({
   selector: 'cnc-size-selector',
@@ -41,14 +42,18 @@ export class SizeSelectorComponent {
   private readonly expansionPanel =
     viewChild<MatExpansionPanel>('panel');
 
-  public readonly product = input<any>(null);
+  // ── Inputs / Outputs ───────────────────────────────────────────
+  public readonly product = input<CncStoreProduct | null>(null);
   public readonly sizeSelected = output<number>();
 
+  // ── Local state ────────────────────────────────────────────────
   protected readonly size = signal(0);
   protected readonly isSizeSelected = signal(false);
 
+  // ── Derived ────────────────────────────────────────────────────
   protected readonly user = computed(() => this.cncService.user());
 
+  /** Reactive stock count — recalculates when user or size changes. */
   protected readonly stock = computed(() => {
     const u = this.user();
     const p = this.product();
@@ -62,10 +67,11 @@ export class SizeSelectorComponent {
     );
   });
 
+  // ── Actions ────────────────────────────────────────────────────
   protected onSizeSelect(
     selectedSize: number,
     index: number,
-    product: any,
+    product: CncStoreProduct,
   ): void {
     this.size.set(selectedSize);
     this.sizeSelected.emit(selectedSize);
@@ -77,7 +83,7 @@ export class SizeSelectorComponent {
     this.expansionPanel()?.close();
   }
 
-  protected openDialog(product: any): void {
+  protected openDialog(product: CncStoreProduct): void {
     if (!this.isSizeSelected()) return;
     this.dialog.open(ProductAvailabilityComponent, {
       data: {

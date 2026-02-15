@@ -18,7 +18,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
-import { Store, NearbyStore } from '../../types/store.type';
+import { CncStore, CncNearbyStore } from '../../types/store.type';
 
 @Component({
   selector: 'cnc-store-selector',
@@ -44,10 +44,12 @@ export class StoreSelectorComponent {
   private readonly searchInput =
     viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
+  // ── Derived from service ───────────────────────────────────────
   protected readonly user = computed(() => this.cncService.user());
   protected readonly stores = computed(() => this.cncService.stores());
 
-  protected readonly nearbyStores = signal<NearbyStore[]>([]);
+  // ── Local state ────────────────────────────────────────────────
+  protected readonly nearbyStores = signal<CncNearbyStore[]>([]);
   protected readonly isStores = signal(false);
 
   constructor() {
@@ -74,7 +76,7 @@ export class StoreSelectorComponent {
     });
   }
 
-  protected onStoreSelect(store: Store): void {
+  protected onStoreSelect(store: CncStore): void {
     this.cncService.selectStore(store);
     this.nearbyStores.set([]);
   }

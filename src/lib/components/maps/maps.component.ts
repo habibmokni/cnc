@@ -16,8 +16,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ClickNCollectService } from '../../services/click-n-collect.service';
-import { Store } from '../../types/store.type';
-import { CartProduct } from '../../types/cart.type';
+import { CncStore } from '../../types/store.type';
+import { CncCartItem } from '../../types/cart.type';
 
 @Component({
   selector: 'cnc-maps',
@@ -33,6 +33,7 @@ export class MapsComponent {
 
   private readonly infoWindow = viewChild<MapInfoWindow>('infoWindow');
 
+  // ── Inputs ─────────────────────────────────────────────────────
   public readonly mapHeight = input<number>(450);
   public readonly mapWidth = input<number>(
     typeof screen !== 'undefined' ? screen.width : 400,
@@ -40,8 +41,9 @@ export class MapsComponent {
   public readonly modelNo = input<string>('');
   public readonly size = input<number>(0);
   public readonly variantId = input<string>('');
-  public readonly cartProducts = input<CartProduct[]>([]);
+  public readonly cartProducts = input<CncCartItem[]>([]);
 
+  // ── Derived from service + inputs ──────────────────────────────
   private readonly filteredData = computed(() => {
     const s = this.size();
     if (s > 0) {
@@ -68,8 +70,9 @@ export class MapsComponent {
     this.cncService.directionsResult(),
   );
 
+  // ── Local state ────────────────────────────────────────────────
   protected readonly isStoreSelected = signal(false);
-  protected readonly currentStore = signal<Store | null>(null);
+  protected readonly currentStore = signal<CncStore | null>(null);
 
   protected readonly mapStyles: google.maps.MapTypeStyle[] = [
     {
@@ -127,6 +130,7 @@ export class MapsComponent {
     };
   });
 
+  // ── Actions ────────────────────────────────────────────────────
   protected onGetCurrentLocation(): void {
     this.cncService.getCurrentLocation();
   }
@@ -137,14 +141,14 @@ export class MapsComponent {
 
   protected openInfoWindow(
     marker: MapMarker,
-    store: Store,
+    store: CncStore,
     event: google.maps.MapMouseEvent,
   ): void {
     this.currentStore.set(store);
     this.infoWindow()?.open(marker);
   }
 
-  protected onStoreSelect(store: Store): void {
+  protected onStoreSelect(store: CncStore): void {
     this.cncService.selectStore(store);
     this.infoWindow()?.close();
     this.dialog.closeAll();

@@ -1,22 +1,43 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { MapDirectionsService } from '@angular/google-maps';
-import { Store, NearbyStore } from '../types/store.type';
+import {
+  CncStore,
+  CncStoreProduct,
+  CncSelectedStore,
+  CncNearbyStore,
+} from '../types/store.type';
 import { CncUser } from '../types/user.type';
-import { CartProduct } from '../types/cart.type';
+import { CncCartItem } from '../types/cart.type';
 
+/**
+ * Central Click & Collect service.
+ *
+ * Generic so consumers keep their richer types:
+ * ```ts
+ * private cncService = inject(ClickNCollectService<ShoeStore, ShoeCartItem, ShoeUser>);
+ * ```
+ *
+ * Default type parameters fall back to the minimal cnc interfaces,
+ * so library components work without specifying generics.
+ */
 @Injectable({ providedIn: 'root' })
-export class ClickNCollectService {
+export class ClickNCollectService<
+  TStore extends CncStore = CncStore,
+  TCartItem extends CncCartItem = CncCartItem,
+  TUser extends CncUser = CncUser,
+> {
   private readonly mapDirectionsService = inject(MapDirectionsService);
 
-  public readonly stores = signal<Store[]>([]);
-  public readonly cartProducts = signal<CartProduct[]>([]);
-  public readonly user = signal<CncUser | null>(null);
+  // ── State signals ───────────────────────────────────────────────
+  public readonly stores = signal<TStore[]>([]);
+  public readonly cartProducts = signal<TCartItem[]>([]);
+  public readonly user = signal<TUser | null>(null);
   public readonly markerPositions = signal<google.maps.LatLngLiteral[]>([]);
   public readonly currentLocation = signal<google.maps.LatLngLiteral | null>(
     null,
   );
   public readonly distanceInKm = signal<number[]>([]);
-  public readonly selectedStore = signal<Store | null>(null);
+  public readonly selectedStore = signal<TStore | null>(null);
   public readonly directionsResult = signal<
     google.maps.DirectionsResult | undefined
   >(undefined);
@@ -25,18 +46,20 @@ export class ClickNCollectService {
     this.getCurrentLocation();
   }
 
-  public readonly nearbyStores = computed<NearbyStore[]>(() => {
+  // ── Derived ─────────────────────────────────────────────────────
+  public readonly nearbyStores = computed<CncNearbyStore<TStore>[]>(() => {
     const distances = this.distanceInKm();
     return this.stores()
       .map((store, i) => ({ store, distance: distances[i] ?? Infinity }))
       .sort((a, b) => a.distance - b.distance);
   });
 
-  public setStoreList(stores: Store[]): void {
+  // ── Setters (public API for consuming apps) ─────────────────────
+  public setStoreList(stores: TStore[]): void {
     this.stores.set(stores);
   }
 
-  public setCartProducts(products: CartProduct[]): void {
+  public setCartProducts(products: TCartItem[]): void {
     this.cartProducts.set(products);
   }
 
@@ -44,19 +67,28 @@ export class ClickNCollectService {
     this.markerPositions.set(locations);
   }
 
-  public setUser(user: CncUser): void {
+  public setUser(user: TUser): void {
     this.user.set(user);
   }
 
-  public selectStore(store: Store): void {
+  // ── Store selection (single source of truth) ────────────────────
+  /**
+   * Select a store and update the user's `storeSelected` reference.
+   * If no user exists, a minimal anonymous user is created.
+   */
+  public selectStore(store: TStore): void {
     this.selectedStore.set(store);
     const u = this.user();
-    const updated: CncUser = u
-      ? { ...u, storeSelected: store }
-      : { name: 'Anonymous', storeSelected: store };
-    this.user.set(updated);
+    if (u) {
+      this.user.set({ ...u, storeSelected: store } as TUser);
+    } else {
+      // Safe: library only reads `storeSelected` from the user.
+      // Consumer-specific fields won't exist on anonymous users.
+      this.user.set({ storeSelected: store } as unknown as TUser);
+    }
   }
 
+  // ── Directions ──────────────────────────────────────────────────
   public getDirections(location: { lat: number; lng: number }): void {
     const origin = this.currentLocation();
     if (!origin) return;
@@ -69,6 +101,7 @@ export class ClickNCollectService {
       .subscribe((response) => this.directionsResult.set(response.result));
   }
 
+  // ── Geolocation ─────────────────────────────────────────────────
   public getCurrentLocation(): void {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((position) => {
@@ -81,6 +114,7 @@ export class ClickNCollectService {
     });
   }
 
+  // ── Distance calculation ────────────────────────────────────────
   public findClosestMarker(lat: number, lng: number): void {
     const R = 6371;
     const rad = (x: number) => (x * Math.PI) / 180;
@@ -95,9 +129,11 @@ export class ClickNCollectService {
     this.distanceInKm.set(distances);
   }
 
+  // ── Pure stock utilities ────────────────────────────────────────
 
+  /** Find in-store stock count for a specific product size. */
   public findStockForSize(
-    storeProducts: readonly any[],
+    storeProducts: readonly CncStoreProduct[],
     modelNo: string,
     variantId: string,
     size: number,
@@ -113,15 +149,19 @@ export class ClickNCollectService {
     return 0;
   }
 
-  public checkCartStock(
-    cart: readonly CartProduct[],
-    storeProducts: readonly any[],
+  /**
+   * Check cart items against a store's inventory.
+   * Generic on T so the `unavailable` array preserves the consumer's cart type.
+   */
+  public checkCartStock<T extends CncCartItem>(
+    cart: readonly T[],
+    storeProducts: readonly CncStoreProduct[],
   ): Readonly<{
     allAvailable: boolean;
-    unavailable: CartProduct[];
+    unavailable: T[];
     total: number;
   }> {
-    const unavailable: CartProduct[] = [];
+    const unavailable: T[] = [];
     let total = 0;
     for (const p of cart) {
       const stock = this.findStockForSize(
@@ -136,13 +176,14 @@ export class ClickNCollectService {
     return { allAvailable: unavailable.length === 0, unavailable, total };
   }
 
+  /** Check single-product availability across all stores. */
   public checkProductAvailability(
     modelNo: string,
     size: number,
     variantId: string,
-  ): NearbyStore[] {
+  ): CncNearbyStore<TStore>[] {
     const distances = this.distanceInKm();
-    const results: NearbyStore[] = [];
+    const results: CncNearbyStore<TStore>[] = [];
     this.stores().forEach((store, i) => {
       for (const product of store.products) {
         if (product.modelNo !== modelNo) continue;
@@ -163,11 +204,12 @@ export class ClickNCollectService {
     return results.sort((a, b) => a.distance - b.distance);
   }
 
+  /** Check full-cart availability across all stores. */
   public checkAllProductsAvailability(
-    cart: readonly CartProduct[],
-  ): NearbyStore[] {
+    cart: readonly CncCartItem[],
+  ): CncNearbyStore<TStore>[] {
     const distances = this.distanceInKm();
-    const results: NearbyStore[] = [];
+    const results: CncNearbyStore<TStore>[] = [];
     this.stores().forEach((store, i) => {
       let allInStock = true;
       for (const cp of cart) {
@@ -191,17 +233,18 @@ export class ClickNCollectService {
     return results.sort((a, b) => a.distance - b.distance);
   }
 
+  /** Filter stores that have a specific product in stock. */
   public filterByProductAvailability(
     modelNo: string,
     size: number,
     variantId: string,
   ): Readonly<{
-    stores: Store[];
+    stores: TStore[];
     locations: google.maps.LatLngLiteral[];
   }> {
     const allStores = this.stores();
     const allLocations = this.markerPositions();
-    const stores: Store[] = [];
+    const stores: TStore[] = [];
     const locations: google.maps.LatLngLiteral[] = [];
 
     allStores.forEach((store, i) => {
@@ -221,15 +264,16 @@ export class ClickNCollectService {
     return { stores, locations };
   }
 
+  /** Filter stores that have all cart products in stock. */
   public filterByCartAvailability(
-    cart: readonly CartProduct[],
+    cart: readonly CncCartItem[],
   ): Readonly<{
-    stores: Store[];
+    stores: TStore[];
     locations: google.maps.LatLngLiteral[];
   }> {
     const allStores = this.stores();
     const allLocations = this.markerPositions();
-    const stores: Store[] = [];
+    const stores: TStore[] = [];
     const locations: google.maps.LatLngLiteral[] = [];
 
     allStores.forEach((store, i) => {

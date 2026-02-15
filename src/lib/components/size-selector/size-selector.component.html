@@ -1,53 +1,55 @@
-<mat-accordion>
-  <mat-expansion-panel #panel>
-    <mat-expansion-panel-header>
-      <mat-panel-title>Select Size</mat-panel-title>
-      @if (isSizeSelected()) {
-        <mat-panel-description>Selected size: {{ size() }}</mat-panel-description>
-      }
-    </mat-expansion-panel-header>
+@if (product(); as p) {
+  <mat-accordion>
+    <mat-expansion-panel #panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Select Size</mat-panel-title>
+        @if (isSizeSelected()) {
+          <mat-panel-description>Selected size: {{ size() }}</mat-panel-description>
+        }
+      </mat-expansion-panel-header>
 
-    @for (s of product()?.variants[0].sizes; track s; let i = $index) {
-      <mat-divider />
-      <a
-        class="cnc-size__item"
-        [class.cnc-size__item--sold-out]="+product()?.variants[0].instock[i] === 0"
-        (click)="onSizeSelect(s, i, product())">
-        {{ s }}
-        <span class="cnc-size__filler"></span>
-        @if (+product()?.variants[0].instock[i] < 5 && +product()?.variants[0].instock[i] > 0) {
-          <span class="cnc-size__badge cnc-stock--low">almost sold out</span>
-        }
-        @if (+product()?.variants[0].instock[i] === 0) {
-          <span class="cnc-size__badge cnc-stock--out">Sold out | Check in stores</span>
-          <mat-icon class="cnc-size__icon" fontSet="material-icons-outlined">room</mat-icon>
-        }
-      </a>
+      @for (s of p.variants[0].sizes; track s; let i = $index) {
+        <mat-divider />
+        <a
+          class="cnc-size__item"
+          [class.cnc-size__item--sold-out]="+p.variants[0].instock[i] === 0"
+          (click)="onSizeSelect(s, i, p)">
+          {{ s }}
+          <span class="cnc-size__filler"></span>
+          @if (+p.variants[0].instock[i] < 5 && +p.variants[0].instock[i] > 0) {
+            <span class="cnc-size__badge cnc-stock--low">almost sold out</span>
+          }
+          @if (+p.variants[0].instock[i] === 0) {
+            <span class="cnc-size__badge cnc-stock--out">Sold out | Check in stores</span>
+            <mat-icon class="cnc-size__icon" fontSet="material-icons-outlined">room</mat-icon>
+          }
+        </a>
+        <mat-divider />
+      }
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <mat-divider />
+
+  @if (user(); as u) {
+    @if (isSizeSelected()) {
+      <div class="cnc-size__store-info">
+        <h3>Your selected store</h3>
+        <p class="cnc-size__store-address">
+          @if (stock() > 5) {
+            <mat-icon class="cnc-stock--good" style="font-size:14px">fiber_manual_record</mat-icon>
+          } @else if (stock() > 0) {
+            <mat-icon class="cnc-stock--low" style="font-size:14px">fiber_manual_record</mat-icon>
+          } @else {
+            <mat-icon class="cnc-stock--out" style="font-size:14px">fiber_manual_record</mat-icon>
+          }
+          {{ u.storeSelected.address }}
+        </p>
+        <button mat-flat-button class="cnc-btn" (click)="openDialog(p)">
+          Change Store
+        </button>
+      </div>
       <mat-divider />
     }
-  </mat-expansion-panel>
-</mat-accordion>
-
-<mat-divider />
-
-@if (user(); as u) {
-  @if (isSizeSelected()) {
-    <div class="cnc-size__store-info">
-      <h3>Your selected store</h3>
-      <p class="cnc-size__store-address">
-        @if (stock() > 5) {
-          <mat-icon class="cnc-stock--good" style="font-size:14px">fiber_manual_record</mat-icon>
-        } @else if (stock() > 0) {
-          <mat-icon class="cnc-stock--low" style="font-size:14px">fiber_manual_record</mat-icon>
-        } @else {
-          <mat-icon class="cnc-stock--out" style="font-size:14px">fiber_manual_record</mat-icon>
-        }
-        {{ u.storeSelected.address }}
-      </p>
-      <button mat-flat-button class="cnc-btn" (click)="openDialog(product())">
-        Change Store
-      </button>
-    </div>
-    <mat-divider />
   }
 }
