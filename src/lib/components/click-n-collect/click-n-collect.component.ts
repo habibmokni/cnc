@@ -51,7 +51,6 @@ export class ClickNCollectComponent {
   private readonly expansionPanel =
     viewChild<MatExpansionPanel>('timePanel');
 
-  // ── Inputs ─────────────────────────────────────────────────────
   public readonly cartProductsInput = input<CncCartItem[]>([], {
     alias: 'cartProducts',
   });
@@ -62,7 +61,6 @@ export class ClickNCollectComponent {
     { alias: 'storeLocations' },
   );
 
-  // ── Outputs ────────────────────────────────────────────────────
   public readonly dateSelected = output<Date>();
   public readonly productsToRemove = output<CncCartItem[]>();
   public readonly orderPrice = output<number>();
@@ -70,7 +68,6 @@ export class ClickNCollectComponent {
   public readonly storeChanged = output<CncStore>();
   public readonly isAllItemsAvailable = output<boolean>();
 
-  // ── Derived state (pure computeds) ─────────────────────────────
   protected readonly user = computed(
     () => this.cncService.user() ?? this.userInput(),
   );
@@ -84,7 +81,6 @@ export class ClickNCollectComponent {
     () => !!this.user()?.storeSelected,
   );
 
-  /** Pure stock derivation — recalculates whenever user or cart changes. */
   protected readonly stockCheck = computed(() => {
     const user = this.user();
     const cart = this.cartProducts();
@@ -106,7 +102,6 @@ export class ClickNCollectComponent {
   );
   protected readonly grandTotal = computed(() => this.stockCheck().total);
 
-  // ── Local mutable state (calendar / time slots) ────────────────
   protected readonly date = signal<Date | null>(null);
   protected readonly times = signal<number[]>([]);
   protected readonly selectedDayIndex = signal(-1);
@@ -127,7 +122,6 @@ export class ClickNCollectComponent {
       this.calendar.push(new Date(year, month, day + i));
     }
 
-    // Emit storeChanged when a new store is selected
     effect(() => {
       const store = this.cncService.selectedStore();
       if (store) {
@@ -135,7 +129,6 @@ export class ClickNCollectComponent {
       }
     });
 
-    // Emit stock-related outputs when derivation changes
     effect(() => {
       const user = this.user();
       if (!user?.storeSelected) return;
@@ -145,7 +138,6 @@ export class ClickNCollectComponent {
     });
   }
 
-  // ── Actions ────────────────────────────────────────────────────
   protected onDaySelect(index: number, date: Date): void {
     if (this.selectedDayIndex() === index) {
       this.selectedDayIndex.set(-1);
