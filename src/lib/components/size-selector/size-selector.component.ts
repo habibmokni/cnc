@@ -8,7 +8,10 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
+import {
+  MatExpansionModule,
+  MatExpansionPanel,
+} from '@angular/material/expansion';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,21 +38,18 @@ export class SizeSelectorComponent {
   private readonly cncService = inject(ClickNCollectService);
   private readonly dialog = inject(MatDialog);
 
-  readonly expansionPanel = viewChild<MatExpansionPanel>('panel');
+  private readonly expansionPanel =
+    viewChild<MatExpansionPanel>('panel');
 
-  // ── Inputs / Outputs ───────────────────────────────────────────
-  readonly product = input<any>(null);
-  readonly sizeSelected = output<number>();
+  public readonly product = input<any>(null);
+  public readonly sizeSelected = output<number>();
 
-  // ── Local state ────────────────────────────────────────────────
-  readonly size = signal(0);
-  readonly isSizeSelected = signal(false);
+  protected readonly size = signal(0);
+  protected readonly isSizeSelected = signal(false);
 
-  // ── Derived ────────────────────────────────────────────────────
-  readonly user = computed(() => this.cncService.user());
+  protected readonly user = computed(() => this.cncService.user());
 
-  /** Reactive stock count — recalculates when user or size changes. */
-  readonly stock = computed(() => {
+  protected readonly stock = computed(() => {
     const u = this.user();
     const p = this.product();
     const s = this.size();
@@ -62,20 +62,22 @@ export class SizeSelectorComponent {
     );
   });
 
-  // ── Actions ────────────────────────────────────────────────────
-  onSizeSelect(selectedSize: number, index: number, product: any): void {
+  protected onSizeSelect(
+    selectedSize: number,
+    index: number,
+    product: any,
+  ): void {
     this.size.set(selectedSize);
     this.sizeSelected.emit(selectedSize);
     this.isSizeSelected.set(true);
 
-    // If out of stock both online and in-store, open dialog
     if (+product.variants[0].instock[index] === 0 && this.stock() === 0) {
       this.openDialog(product);
     }
     this.expansionPanel()?.close();
   }
 
-  openDialog(product: any): void {
+  protected openDialog(product: any): void {
     if (!this.isSizeSelected()) return;
     this.dialog.open(ProductAvailabilityComponent, {
       data: {

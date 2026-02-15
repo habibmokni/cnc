@@ -41,20 +41,16 @@ export class StoreSelectorComponent {
   private readonly cncService = inject(ClickNCollectService);
   private readonly ngZone = inject(NgZone);
 
-  // ── viewChild for autocomplete (replaces document.getElementById) ─
-  readonly searchInput =
+  private readonly searchInput =
     viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
-  // ── Derived from service ───────────────────────────────────────
-  readonly user = computed(() => this.cncService.user());
-  readonly stores = computed(() => this.cncService.stores());
+  protected readonly user = computed(() => this.cncService.user());
+  protected readonly stores = computed(() => this.cncService.stores());
 
-  // ── Local state ────────────────────────────────────────────────
-  readonly nearbyStores = signal<NearbyStore[]>([]);
-  readonly isStores = signal(false);
+  protected readonly nearbyStores = signal<NearbyStore[]>([]);
+  protected readonly isStores = signal(false);
 
   constructor() {
-    // Set up Google Places Autocomplete when the input element appears
     effect((onCleanup) => {
       const el = this.searchInput()?.nativeElement;
       if (!el) return;
@@ -78,8 +74,7 @@ export class StoreSelectorComponent {
     });
   }
 
-  // ── Actions ────────────────────────────────────────────────────
-  onStoreSelect(store: Store): void {
+  protected onStoreSelect(store: Store): void {
     this.cncService.selectStore(store);
     this.nearbyStores.set([]);
   }

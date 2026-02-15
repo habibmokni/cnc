@@ -8,46 +8,47 @@ import { CartProduct } from '../types/cart.type';
 export class ClickNCollectService {
   private readonly mapDirectionsService = inject(MapDirectionsService);
 
-  readonly stores = signal<Store[]>([]);
-  readonly cartProducts = signal<CartProduct[]>([]);
-  readonly user = signal<CncUser | null>(null);
-  readonly markerPositions = signal<google.maps.LatLngLiteral[]>([]);
-  readonly currentLocation = signal<google.maps.LatLngLiteral | null>(null);
-  readonly distanceInKm = signal<number[]>([]);
-  readonly selectedStore = signal<Store | null>(null);
-  readonly directionsResult = signal<google.maps.DirectionsResult | undefined>(
-    undefined,
+  public readonly stores = signal<Store[]>([]);
+  public readonly cartProducts = signal<CartProduct[]>([]);
+  public readonly user = signal<CncUser | null>(null);
+  public readonly markerPositions = signal<google.maps.LatLngLiteral[]>([]);
+  public readonly currentLocation = signal<google.maps.LatLngLiteral | null>(
+    null,
   );
+  public readonly distanceInKm = signal<number[]>([]);
+  public readonly selectedStore = signal<Store | null>(null);
+  public readonly directionsResult = signal<
+    google.maps.DirectionsResult | undefined
+  >(undefined);
 
   constructor() {
     this.getCurrentLocation();
   }
 
-  readonly nearbyStores = computed<NearbyStore[]>(() => {
+  public readonly nearbyStores = computed<NearbyStore[]>(() => {
     const distances = this.distanceInKm();
     return this.stores()
       .map((store, i) => ({ store, distance: distances[i] ?? Infinity }))
       .sort((a, b) => a.distance - b.distance);
   });
 
-  setStoreList(stores: Store[]): void {
+  public setStoreList(stores: Store[]): void {
     this.stores.set(stores);
   }
 
-  setCartProducts(products: CartProduct[]): void {
+  public setCartProducts(products: CartProduct[]): void {
     this.cartProducts.set(products);
   }
 
-  setStoreLocations(locations: google.maps.LatLngLiteral[]): void {
+  public setStoreLocations(locations: google.maps.LatLngLiteral[]): void {
     this.markerPositions.set(locations);
   }
 
-  setUser(user: CncUser): void {
+  public setUser(user: CncUser): void {
     this.user.set(user);
   }
 
-  // ── Store selection (single source of truth) ────────────────────
-  selectStore(store: Store): void {
+  public selectStore(store: Store): void {
     this.selectedStore.set(store);
     const u = this.user();
     const updated: CncUser = u
@@ -56,7 +57,7 @@ export class ClickNCollectService {
     this.user.set(updated);
   }
 
-  getDirections(location: { lat: number; lng: number }): void {
+  public getDirections(location: { lat: number; lng: number }): void {
     const origin = this.currentLocation();
     if (!origin) return;
     this.mapDirectionsService
@@ -68,7 +69,7 @@ export class ClickNCollectService {
       .subscribe((response) => this.directionsResult.set(response.result));
   }
 
-  getCurrentLocation(): void {
+  public getCurrentLocation(): void {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition((position) => {
       const pos: google.maps.LatLngLiteral = {
@@ -80,7 +81,7 @@ export class ClickNCollectService {
     });
   }
 
-  findClosestMarker(lat: number, lng: number): void {
+  public findClosestMarker(lat: number, lng: number): void {
     const R = 6371;
     const rad = (x: number) => (x * Math.PI) / 180;
     const distances = this.markerPositions().map((m) => {
@@ -95,7 +96,7 @@ export class ClickNCollectService {
   }
 
 
-  findStockForSize(
+  public findStockForSize(
     storeProducts: readonly any[],
     modelNo: string,
     variantId: string,
@@ -112,7 +113,7 @@ export class ClickNCollectService {
     return 0;
   }
 
-  checkCartStock(
+  public checkCartStock(
     cart: readonly CartProduct[],
     storeProducts: readonly any[],
   ): Readonly<{
@@ -135,7 +136,7 @@ export class ClickNCollectService {
     return { allAvailable: unavailable.length === 0, unavailable, total };
   }
 
-  checkProductAvailability(
+  public checkProductAvailability(
     modelNo: string,
     size: number,
     variantId: string,
@@ -162,7 +163,9 @@ export class ClickNCollectService {
     return results.sort((a, b) => a.distance - b.distance);
   }
 
-  checkAllProductsAvailability(cart: readonly CartProduct[]): NearbyStore[] {
+  public checkAllProductsAvailability(
+    cart: readonly CartProduct[],
+  ): NearbyStore[] {
     const distances = this.distanceInKm();
     const results: NearbyStore[] = [];
     this.stores().forEach((store, i) => {
@@ -188,7 +191,7 @@ export class ClickNCollectService {
     return results.sort((a, b) => a.distance - b.distance);
   }
 
-  filterByProductAvailability(
+  public filterByProductAvailability(
     modelNo: string,
     size: number,
     variantId: string,
@@ -218,7 +221,7 @@ export class ClickNCollectService {
     return { stores, locations };
   }
 
-  filterByCartAvailability(
+  public filterByCartAvailability(
     cart: readonly CartProduct[],
   ): Readonly<{
     stores: Store[];

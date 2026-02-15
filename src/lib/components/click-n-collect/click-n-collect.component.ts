@@ -10,7 +10,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
+import {
+  MatExpansionModule,
+  MatExpansionPanel,
+} from '@angular/material/expansion';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -45,59 +48,66 @@ export class ClickNCollectComponent {
   private readonly dialog = inject(MatDialog);
   private readonly cncService = inject(ClickNCollectService);
 
-  readonly expansionPanel = viewChild<MatExpansionPanel>('timePanel');
+  private readonly expansionPanel =
+    viewChild<MatExpansionPanel>('timePanel');
 
-  // ── Inputs ─────────────────────────────────────────────────────
-  readonly cartProductsInput = input<CartProduct[]>([], { alias: 'cartProducts' });
-  readonly storesInput = input<Store[]>([], { alias: 'stores' });
-  readonly userInput = input<CncUser | null>(null, { alias: 'user' });
-  readonly storeLocationsInput = input<google.maps.LatLngLiteral[]>([], {
-    alias: 'storeLocations',
+  public readonly cartProductsInput = input<CartProduct[]>([], {
+    alias: 'cartProducts',
   });
+  public readonly storesInput = input<Store[]>([], { alias: 'stores' });
+  public readonly userInput = input<CncUser | null>(null, { alias: 'user' });
+  public readonly storeLocationsInput = input<google.maps.LatLngLiteral[]>(
+    [],
+    { alias: 'storeLocations' },
+  );
 
-  // ── Outputs ────────────────────────────────────────────────────
-  readonly dateSelected = output<Date>();
-  readonly productsToRemove = output<CartProduct[]>();
-  readonly orderPrice = output<number>();
-  readonly timeSelected = output<string>();
-  readonly storeChanged = output<Store>();
-  readonly isAllItemsAvailable = output<boolean>();
+  public readonly dateSelected = output<Date>();
+  public readonly productsToRemove = output<CartProduct[]>();
+  public readonly orderPrice = output<number>();
+  public readonly timeSelected = output<string>();
+  public readonly storeChanged = output<Store>();
+  public readonly isAllItemsAvailable = output<boolean>();
 
-  // ── Derived state (pure computeds) ─────────────────────────────
-  readonly user = computed(
+  protected readonly user = computed(
     () => this.cncService.user() ?? this.userInput(),
   );
 
-  readonly cartProducts = computed(() => {
+  protected readonly cartProducts = computed(() => {
     const fromService = this.cncService.cartProducts();
     return fromService.length > 0 ? fromService : this.cartProductsInput();
   });
 
-  readonly isStoreSelected = computed(
+  protected readonly isStoreSelected = computed(
     () => !!this.user()?.storeSelected,
   );
 
-  /** Pure stock derivation — recalculates whenever user or cart changes. */
-  readonly stockCheck = computed(() => {
+  protected readonly stockCheck = computed(() => {
     const u = this.user();
     const cart = this.cartProducts();
     if (!u?.storeSelected?.products) {
-      return { allAvailable: true, unavailable: [] as CartProduct[], total: 0 };
+      return {
+        allAvailable: true,
+        unavailable: [] as CartProduct[],
+        total: 0,
+      };
     }
     return this.cncService.checkCartStock(cart, u.storeSelected.products);
   });
 
-  readonly allItemsAvailable = computed(() => this.stockCheck().allAvailable);
-  readonly cartItemUnavailable = computed(() => this.stockCheck().unavailable);
-  readonly grandTotal = computed(() => this.stockCheck().total);
+  protected readonly allItemsAvailable = computed(
+    () => this.stockCheck().allAvailable,
+  );
+  protected readonly cartItemUnavailable = computed(
+    () => this.stockCheck().unavailable,
+  );
+  protected readonly grandTotal = computed(() => this.stockCheck().total);
 
-  // ── Local mutable state (calendar / time slots) ────────────────
-  readonly date = signal<Date | null>(null);
-  readonly times = signal<number[]>([]);
-  readonly selectedDayIndex = signal(-1);
+  protected readonly date = signal<Date | null>(null);
+  protected readonly times = signal<number[]>([]);
+  protected readonly selectedDayIndex = signal(-1);
 
-  readonly calendar: Date[] = [];
-  readonly days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  protected readonly calendar: Date[] = [];
+  protected readonly days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   private readonly currentTime: number;
 
   constructor() {
@@ -112,9 +122,7 @@ export class ClickNCollectComponent {
       this.calendar.push(new Date(year, month, day + i));
     }
 
-    // ── Side-effects via effect() ──────────────────────────────
 
-    // Emit storeChanged when a new store is selected
     effect(() => {
       const store = this.cncService.selectedStore();
       if (store) {
@@ -122,7 +130,6 @@ export class ClickNCollectComponent {
       }
     });
 
-    // Emit stock-related outputs when derivation changes
     effect(() => {
       const u = this.user();
       if (!u?.storeSelected) return;
@@ -132,8 +139,7 @@ export class ClickNCollectComponent {
     });
   }
 
-  // ── Actions ────────────────────────────────────────────────────
-  onDaySelect(index: number, date: Date): void {
+  protected onDaySelect(index: number, date: Date): void {
     if (this.selectedDayIndex() === index) {
       this.selectedDayIndex.set(-1);
       this.times.set([]);
@@ -154,23 +160,23 @@ export class ClickNCollectComponent {
     this.times.set(newTimes);
   }
 
-  onTimeSelected(time: number): void {
+  protected onTimeSelected(time: number): void {
     this.timeSelected.emit(`${time}:00 - ${time + 1}:00`);
     this.expansionPanel()?.close();
   }
 
-  onOpenDialog(): void {
+  protected onOpenDialog(): void {
     this.dialog.open(ProductAvailabilityComponent, {
       data: { call: 'checkout' },
     });
   }
 
-  removeProductsUnavailable(): void {
+  protected removeProductsUnavailable(): void {
     this.productsToRemove.emit(this.cartItemUnavailable());
     this.isAllItemsAvailable.emit(true);
   }
 
-  selectStore(): void {
+  protected selectStore(): void {
     this.router.navigate(['/storeselector']);
   }
 }

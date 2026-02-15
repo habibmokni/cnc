@@ -42,15 +42,15 @@ import { NearbyStore } from '../../types/store.type';
 export class CheckAvailabilityComponent {
   private readonly ngZone = inject(NgZone);
   private readonly cncService = inject(ClickNCollectService);
-  readonly data: any = inject(MAT_DIALOG_DATA);
+  protected readonly data: any = inject(MAT_DIALOG_DATA);
 
-  readonly searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');
+  private readonly searchInput =
+    viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
-  readonly stores = computed(() => this.cncService.stores());
-
-  readonly nearbyStores = signal<NearbyStore[]>([]);
-  readonly size = signal(0);
-  readonly isSizeSelected = signal(false);
+  // ── Local state ────────────────────────────────────────────────
+  protected readonly nearbyStores = signal<NearbyStore[]>([]);
+  protected readonly size = signal(0);
+  protected readonly isSizeSelected = signal(false);
 
   private readonly geoRequested = signal(false);
 
@@ -87,6 +87,7 @@ export class CheckAvailabilityComponent {
       onCleanup(() => google.maps.event.removeListener(listener));
     });
 
+    // React to geolocation resolving after user clicks "use my location"
     effect(() => {
       const loc = this.cncService.currentLocation();
       if (!loc || !this.geoRequested()) return;
@@ -103,13 +104,13 @@ export class CheckAvailabilityComponent {
     });
   }
 
-  changeSize(newSize: number): void {
+  protected changeSize(newSize: number): void {
     this.nearbyStores.set([]);
     this.size.set(newSize);
     this.isSizeSelected.set(true);
   }
 
-  currentLocation(): void {
+  protected currentLocation(): void {
     this.geoRequested.set(true);
     this.cncService.getCurrentLocation();
   }

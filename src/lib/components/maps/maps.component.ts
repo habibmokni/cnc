@@ -31,16 +31,16 @@ export class MapsComponent {
   private readonly cncService = inject(ClickNCollectService);
   private readonly dialog = inject(MatDialog);
 
-  readonly infoWindow = viewChild<MapInfoWindow>('infoWindow');
+  private readonly infoWindow = viewChild<MapInfoWindow>('infoWindow');
 
-  readonly mapHeight = input<number>(450);
-  readonly mapWidth = input<number>(
+  public readonly mapHeight = input<number>(450);
+  public readonly mapWidth = input<number>(
     typeof screen !== 'undefined' ? screen.width : 400,
   );
-  readonly modelNo = input<string>('');
-  readonly size = input<number>(0);
-  readonly variantId = input<string>('');
-  readonly cartProducts = input<CartProduct[]>([]);
+  public readonly modelNo = input<string>('');
+  public readonly size = input<number>(0);
+  public readonly variantId = input<string>('');
+  public readonly cartProducts = input<CartProduct[]>([]);
 
   private readonly filteredData = computed(() => {
     const s = this.size();
@@ -60,16 +60,18 @@ export class MapsComponent {
     };
   });
 
-  readonly storeList = computed(() => this.filteredData().stores);
-  readonly storeLocations = computed(() => this.filteredData().locations);
-  readonly directionsResult = computed(() =>
+  protected readonly storeList = computed(() => this.filteredData().stores);
+  protected readonly storeLocations = computed(
+    () => this.filteredData().locations,
+  );
+  protected readonly directionsResult = computed(() =>
     this.cncService.directionsResult(),
   );
 
-  readonly isStoreSelected = signal(false);
-  readonly currentStore = signal<Store | null>(null);
+  protected readonly isStoreSelected = signal(false);
+  protected readonly currentStore = signal<Store | null>(null);
 
-  readonly mapStyles: google.maps.MapTypeStyle[] = [
+  protected readonly mapStyles: google.maps.MapTypeStyle[] = [
     {
       featureType: 'administrative',
       elementType: 'all',
@@ -107,15 +109,16 @@ export class MapsComponent {
     },
   ];
 
-  readonly markerOptions: google.maps.MarkerOptions = {
+  protected readonly markerOptions: google.maps.MarkerOptions = {
     draggable: false,
     animation: google.maps.Animation.DROP,
   };
 
-  // ── Derived from service (no hardcoded coords) ─────────────────
-  readonly currentLocation = computed(() => this.cncService.currentLocation());
+  protected readonly currentLocation = computed(() =>
+    this.cncService.currentLocation(),
+  );
 
-  readonly options = computed<google.maps.MapOptions>(() => {
+  protected readonly options = computed<google.maps.MapOptions>(() => {
     const loc = this.currentLocation();
     return {
       ...(loc ? { center: loc } : {}),
@@ -124,15 +127,15 @@ export class MapsComponent {
     };
   });
 
-  onGetCurrentLocation(): void {
+  protected onGetCurrentLocation(): void {
     this.cncService.getCurrentLocation();
   }
 
-  onGetDirections(location: { lat: number; lng: number }): void {
+  protected onGetDirections(location: { lat: number; lng: number }): void {
     this.cncService.getDirections(location);
   }
 
-  openInfoWindow(
+  protected openInfoWindow(
     marker: MapMarker,
     store: Store,
     event: google.maps.MapMouseEvent,
@@ -141,14 +144,14 @@ export class MapsComponent {
     this.infoWindow()?.open(marker);
   }
 
-  onStoreSelect(store: Store): void {
+  protected onStoreSelect(store: Store): void {
     this.cncService.selectStore(store);
     this.infoWindow()?.close();
     this.dialog.closeAll();
     this.isStoreSelected.set(true);
   }
 
-  reselectStore(): void {
+  protected reselectStore(): void {
     this.isStoreSelected.set(false);
   }
 }

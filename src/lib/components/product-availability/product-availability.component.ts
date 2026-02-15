@@ -9,7 +9,11 @@ import {
   viewChild,
   NgZone,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogModule,
+} from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
@@ -44,21 +48,19 @@ export class ProductAvailabilityComponent {
   private readonly ngZone = inject(NgZone);
   private readonly cncService = inject(ClickNCollectService);
   private readonly dialog = inject(MatDialog);
-  readonly data: any = inject(MAT_DIALOG_DATA);
+  protected readonly data: any = inject(MAT_DIALOG_DATA);
 
-  // ── viewChild for autocomplete (replaces document.getElementById) ─
-  readonly searchInput =
+  private readonly searchInput =
     viewChild<ElementRef<HTMLInputElement>>('searchInput');
 
-  // ── Derived from service ───────────────────────────────────────
-  readonly stores = computed(() => this.cncService.stores());
-  readonly cartProducts = computed(() => this.cncService.cartProducts());
+  protected readonly stores = computed(() => this.cncService.stores());
+  protected readonly cartProducts = computed(
+    () => this.cncService.cartProducts(),
+  );
 
-  // ── Local state ────────────────────────────────────────────────
-  readonly nearbyStores = signal<NearbyStore[]>([]);
+  protected readonly nearbyStores = signal<NearbyStore[]>([]);
 
   constructor() {
-    // Set up Google Places Autocomplete when the input element appears
     effect((onCleanup) => {
       const el = this.searchInput()?.nativeElement;
       if (!el) return;
@@ -101,8 +103,7 @@ export class ProductAvailabilityComponent {
     });
   }
 
-  // ── Actions ────────────────────────────────────────────────────
-  onStoreSelect(store: Store): void {
+  protected onStoreSelect(store: Store): void {
     this.cncService.selectStore(store);
     this.dialog.closeAll();
   }
