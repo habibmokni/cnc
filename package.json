@@ -12,7 +12,7 @@
     "url": "https://github.com/habibmokni/cnc"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/habibmokni"
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
