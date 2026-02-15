@@ -15,10 +15,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ClickNCollectService } from '../clickNCollect.service';
+import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
-import { Store, NearbyStore } from '../models/store.model';
-import { CartProduct } from '../models/cart.model';
+import { Store, NearbyStore } from '../../types/store.type';
+import { CartProduct } from '../../types/cart.type';
 
 @Component({
   selector: 'cnc-product-availability',
@@ -35,8 +35,8 @@ import { CartProduct } from '../models/cart.model';
     MatFormFieldModule,
     MapsComponent,
   ],
-  templateUrl: './productAvailability.component.html',
-  styleUrl: './productAvailability.component.css',
+  templateUrl: './product-availability.component.html',
+  styleUrl: './product-availability.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductAvailabilityComponent implements OnInit {

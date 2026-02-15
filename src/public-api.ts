@@ -2,19 +2,19 @@
  * Public API Surface of @habibmokni/cnc v2
  */
 
-// Models
-export * from './lib/models/index';
+// Types
+export * from './lib/types/index';
 
 // Service
-export { ClickNCollectService } from './lib/clickNCollect.service';
+export { ClickNCollectService } from './lib/services/click-n-collect.service';
 
 // Standalone components
-export { ClickNCollectComponent } from './lib/clickNCollect.component';
-export { StoreSelectorComponent } from './lib/store-selector/store-selector.component';
-export { SizeSelectorComponent } from './lib/sizeSelector/sizeSelector.component';
-export { ProductAvailabilityComponent } from './lib/productAvailability/productAvailability.component';
-export { CheckAvailabilityComponent } from './lib/checkAvailability/checkAvailability.component';
-export { MapsComponent } from './lib/maps/maps.component';
+export { ClickNCollectComponent } from './lib/components/click-n-collect/click-n-collect.component';
+export { StoreSelectorComponent } from './lib/components/store-selector/store-selector.component';
+export { SizeSelectorComponent } from './lib/components/size-selector/size-selector.component';
+export { ProductAvailabilityComponent } from './lib/components/product-availability/product-availability.component';
+export { CheckAvailabilityComponent } from './lib/components/check-availability/check-availability.component';
+export { MapsComponent } from './lib/components/maps/maps.component';
 
 // Backward-compatible barrel module
-export { ClickNCollectModule } from './lib/clickNCollect.module';
+export { ClickNCollectModule } from './lib/modules/click-n-collect.module';

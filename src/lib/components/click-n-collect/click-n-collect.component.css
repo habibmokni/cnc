@@ -12,10 +12,10 @@
   gap: 12px;
   padding: 16px;
   cursor: pointer;
+}
 
-  &:hover {
-    background: var(--mat-sys-surface-container-low, #f7f2fa);
-  }
+.cnc-checkout__store:hover {
+  background: var(--mat-sys-surface-container-low, #f7f2fa);
 }
 
 .cnc-checkout__store-icon {
@@ -27,12 +27,12 @@
 
 .cnc-checkout__store-info {
   flex: 1;
+}
 
-  h2 {
-    margin: 0;
-    font-size: 1.125rem;
-    color: var(--mat-sys-on-surface, #1c1b1f);
-  }
+.cnc-checkout__store-info h2 {
+  margin: 0;
+  font-size: 1.125rem;
+  color: var(--mat-sys-on-surface, #1c1b1f);
 }
 
 .cnc-checkout__store-address {
@@ -66,28 +66,28 @@
   width: 80px;
   height: 80px;
   flex-shrink: 0;
+}
 
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-  }
+.cnc-checkout__item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
 }
 
 .cnc-checkout__item-details {
   flex: 1;
+}
 
-  h3 {
-    margin: 0 0 4px;
-    font-size: 1rem;
-  }
+.cnc-checkout__item-details h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
 
-  p {
-    margin: 0;
-    font-size: 0.875rem;
-    color: var(--mat-sys-on-surface-variant, #49454f);
-  }
+.cnc-checkout__item-details p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--mat-sys-on-surface-variant, #49454f);
 }
 
 .cnc-checkout__item-price {
@@ -124,10 +124,10 @@
   overflow-x: auto;
   padding-bottom: 12px;
   scrollbar-width: none;
+}
 
-  &::-webkit-scrollbar {
-    display: none;
-  }
+.cnc-checkout__calendar::-webkit-scrollbar {
+  display: none;
 }
 
 .cnc-checkout__day-btn {
@@ -182,15 +182,15 @@
   align-items: center;
   text-align: center;
   padding: 32px 16px;
+}
 
-  h2 {
-    color: var(--mat-sys-on-surface, #1c1b1f);
-  }
+.cnc-checkout__empty h2 {
+  color: var(--mat-sys-on-surface, #1c1b1f);
+}
 
-  p {
-    color: var(--mat-sys-on-surface-variant, #49454f);
-    margin-bottom: 16px;
-  }
+.cnc-checkout__empty p {
+  color: var(--mat-sys-on-surface-variant, #49454f);
+  margin-bottom: 16px;
 }
 
 /* Shared button style */

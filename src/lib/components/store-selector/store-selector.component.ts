@@ -14,10 +14,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ClickNCollectService } from '../clickNCollect.service';
+import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
-import { Store, NearbyStore } from '../models/store.model';
-import { CncUser } from '../models/user.model';
+import { Store, NearbyStore } from '../../types/store.type';
+import { CncUser } from '../../types/user.type';
 
 @Component({
   selector: 'cnc-store-selector',

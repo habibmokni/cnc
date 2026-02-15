@@ -15,9 +15,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
-import { ClickNCollectService } from '../clickNCollect.service';
-import { ProductAvailabilityComponent } from '../productAvailability/productAvailability.component';
-import { CncUser } from '../models/user.model';
+import { ClickNCollectService } from '../../services/click-n-collect.service';
+import { ProductAvailabilityComponent } from '../product-availability/product-availability.component';
+import { CncUser } from '../../types/user.type';
 
 @Component({
   selector: 'cnc-size-selector',
@@ -30,8 +30,8 @@ import { CncUser } from '../models/user.model';
     MatIconModule,
     MatDividerModule,
   ],
-  templateUrl: './sizeSelector.component.html',
-  styleUrl: './sizeSelector.component.css',
+  templateUrl: './size-selector.component.html',
+  styleUrl: './size-selector.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SizeSelectorComponent implements OnInit {

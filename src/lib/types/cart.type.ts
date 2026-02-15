@@ -1,5 +1,5 @@
 /** A product in the shopping cart. */
-export interface CartProduct {
+export type CartProduct = Readonly<{
   modelNo: string;
   productName: string;
   productImage: string;
@@ -8,4 +8,4 @@ export interface CartProduct {
   size: number;
   noOfItems: number;
   variantId?: string;
-}
+}>;

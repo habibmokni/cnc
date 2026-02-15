@@ -2,9 +2,9 @@ import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MapDirectionsService } from '@angular/google-maps';
-import { Store, NearbyStore } from './models/store.model';
-import { CncUser } from './models/user.model';
-import { CartProduct } from './models/cart.model';
+import { Store, NearbyStore } from '../types/store.type';
+import { CncUser } from '../types/user.type';
+import { CartProduct } from '../types/cart.type';
 
 @Injectable({ providedIn: 'root' })
 export class ClickNCollectService {

@@ -15,9 +15,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ClickNCollectService } from '../clickNCollect.service';
+import { ClickNCollectService } from '../../services/click-n-collect.service';
 import { MapsComponent } from '../maps/maps.component';
-import { Store, NearbyStore } from '../models/store.model';
+import { Store, NearbyStore } from '../../types/store.type';
 
 @Component({
   selector: 'cnc-check-availability',
@@ -34,8 +34,8 @@ import { Store, NearbyStore } from '../models/store.model';
     MatFormFieldModule,
     MapsComponent,
   ],
-  templateUrl: './checkAvailability.component.html',
-  styleUrl: './checkAvailability.component.css',
+  templateUrl: './check-availability.component.html',
+  styleUrl: './check-availability.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CheckAvailabilityComponent implements OnInit {

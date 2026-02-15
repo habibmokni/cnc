@@ -1,13 +1,13 @@
 /** The user's selected store reference. */
-export interface SelectedStore {
+export type SelectedStore = Readonly<{
   id: string;
   name: string;
   address: string;
   products?: any[];
-}
+}>;
 
 /** The current user. */
-export interface CncUser {
+export type CncUser = Readonly<{
   firstName?: string;
   lastName?: string;
   name?: string;
@@ -16,4 +16,4 @@ export interface CncUser {
   zipCode?: string;
   storeSelected: SelectedStore;
   wishlist?: string[];
-}
+}>;

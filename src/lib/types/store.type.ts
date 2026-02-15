@@ -1,24 +1,24 @@
 /** A product variant with sizes and stock counts per size. */
-export interface StoreVariant {
+export type StoreVariant = Readonly<{
   variantId: string;
   sizes: number[];
   instock: number[];
-}
+}>;
 
 /** A product carried by a store, with its variants. */
-export interface StoreProduct {
+export type StoreProduct = Readonly<{
   modelNo: string;
   variants: StoreVariant[];
-}
+}>;
 
 /** Opening hours for a store. */
-export interface OpeningTime {
+export type OpeningTime = Readonly<{
   open: string;
   close: string;
-}
+}>;
 
 /** A physical store location. */
-export interface Store {
+export type Store = Readonly<{
   id: string;
   name: string;
   address: string;
@@ -28,11 +28,11 @@ export interface Store {
   reviews?: string;
   isDefault?: boolean;
   products: StoreProduct[];
-}
+}>;
 
 /** A store with computed distance from the user. */
-export interface NearbyStore {
+export type NearbyStore = Readonly<{
   store: Store;
   distance: number;
   stock?: number;
-}
+}>;

@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
-import { ClickNCollectComponent } from './clickNCollect.component';
-import { StoreSelectorComponent } from './store-selector/store-selector.component';
-import { SizeSelectorComponent } from './sizeSelector/sizeSelector.component';
-import { ProductAvailabilityComponent } from './productAvailability/productAvailability.component';
-import { CheckAvailabilityComponent } from './checkAvailability/checkAvailability.component';
-import { MapsComponent } from './maps/maps.component';
+import { ClickNCollectComponent } from '../components/click-n-collect/click-n-collect.component';
+import { StoreSelectorComponent } from '../components/store-selector/store-selector.component';
+import { SizeSelectorComponent } from '../components/size-selector/size-selector.component';
+import { ProductAvailabilityComponent } from '../components/product-availability/product-availability.component';
+import { CheckAvailabilityComponent } from '../components/check-availability/check-availability.component';
+import { MapsComponent } from '../components/maps/maps.component';
 
 /**
  * Barrel NgModule for backward compatibility.

@@ -17,11 +17,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog } from '@angular/material/dialog';
-import { ClickNCollectService } from './clickNCollect.service';
-import { ProductAvailabilityComponent } from './productAvailability/productAvailability.component';
-import { CartProduct } from './models/cart.model';
-import { Store } from './models/store.model';
-import { CncUser } from './models/user.model';
+import { ClickNCollectService } from '../../services/click-n-collect.service';
+import { ProductAvailabilityComponent } from '../product-availability/product-availability.component';
+import { CartProduct } from '../../types/cart.type';
+import { Store } from '../../types/store.type';
+import { CncUser } from '../../types/user.type';
 
 @Component({
   selector: 'cnc-click-n-collect',
@@ -36,8 +36,8 @@ import { CncUser } from './models/user.model';
     MatRadioModule,
     MatDividerModule,
   ],
-  templateUrl: './clickNCollect.component.html',
-  styleUrl: './clickNCollect.component.scss',
+  templateUrl: './click-n-collect.component.html',
+  styleUrl: './click-n-collect.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClickNCollectComponent implements OnInit {
@@ -91,8 +91,6 @@ export class ClickNCollectComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Populate from service or inputs
-    const serviceStores = this.cncService.stores();
     this.cartProducts.set(
       this.cncService.cartProducts().length > 0
         ? this.cncService.cartProducts()
@@ -100,7 +98,6 @@ export class ClickNCollectComponent implements OnInit {
     );
     this.user.set(this.cncService.user() ?? this.userInput());
 
-    // Listen for store changes
     this.cncService.storeSelected.subscribe((store) => {
       this.storeChanged.emit(store);
       const u = this.user();
@@ -111,7 +108,6 @@ export class ClickNCollectComponent implements OnInit {
       this.recheckStock();
     });
 
-    // Initial stock check
     if (this.user()) {
       this.isStoreSelected.set(true);
       this.recheckStock();

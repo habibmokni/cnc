@@ -17,9 +17,9 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { ClickNCollectService } from '../clickNCollect.service';
-import { Store } from '../models/store.model';
-import { CartProduct } from '../models/cart.model';
+import { ClickNCollectService } from '../../services/click-n-collect.service';
+import { Store } from '../../types/store.type';
+import { CartProduct } from '../../types/cart.type';
 
 @Component({
   selector: 'cnc-maps',
